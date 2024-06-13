@@ -1,5 +1,6 @@
 from enum import Enum
-import sys
+from typing import Optional, List
+from dataclasses import dataclass
 #from htmlnode import Type_Rules
 text_type_text = "text"
 text_type_bold = "bold"
@@ -19,19 +20,21 @@ delimiters = {
 "italic": "*",
 "code_block": "```",
 "code": "`",
-"link": "[",
-"image": "!",
-"heading": "#",
-"strikethrough": "~~" }
+"strikethrough": "~~",
+# "link": "[",
+# "image": "!",
+# "heading": "#"
+}
 delimiters2 = {
 "**": "bold",
 "*": "italic",
 "```": "code_block",
 "`": "code",
-"[": "link",
-"!": "image",
-"#": "heading",
-"~~": "strikethrough" }
+"~~": "strikethrough",
+# "[": "link",
+# "!": "image",
+# "#": "heading" 
+}
 
 class TextNode():
     def __init__(self, text, text_type, url=None):
@@ -45,66 +48,68 @@ class TextNode():
     def __repr__(self) -> str:
         return f"TextNode({self.text}, {self.text_type}, {self.url})"
 
-def mk_to_textnode(text):
-    nodes = []
-    if bool(text) is False or text is None:
-            sys.exit
-    for delim in delimiters2.keys():
-            if delim not in text:
-                continue
-            else:
-                text.find(delim)
-                new_string = text[:text.find(delim)]
-                if bool(new_string) == True:
-                    nodes.append((TextNode(new_string, "text")))
-                delim_string = text[text.find(delim)+1:text.rfind(delim)]
-                nodes.append((TextNode(delim_string.strip(delim), delimiters2.get(delim))))
-                mk_to_textnode(delim_string)
-                after_delim_string = text[text.rfind(delim)+1:]
-                mk_to_textnode(after_delim_string[after_delim_string.rfind(delim)+1:])
-                if bool(after_delim_string) == True:
-                    nodes.extend(mk_to_textnode(after_delim_string.lstrip(delim)))
-                return nodes
-    nodes.append(TextNode(text, "text"))
-    return nodes
+class TextType(Enum):
+    TEXT = "TEXT"
+    BOLD = "BOLD"
+    ITALIC = "ITALIC"
+    CODE = "CODE"
+    LINK = "LINK"
+    IMAGE = "IMAGE"
 
-###Needs work 
-def text_nodes_delimiter(old_nodes, text_type, *delimiter):
+DELIMITER_TO_TYPE = {
+    '**': TextType.BOLD,
+    '*': TextType.ITALIC,
+    '`': TextType.CODE,
+}
+
+# @dataclass()
+# class TextNode:
+#     text: str
+#     text_type: TextType
+#     url: Optional[str] = None
+
+def split_node_delimiter(old_node: TextNode, delimiter: str) -> List[TextNode]:
+    if old_node.text_type != TextType.TEXT:
+        return [old_node]
     new_nodes = []
-    for node in old_nodes:
-        if isinstance(node, TextNode):
-            if text_type is not text_type_text:
-                print(f"this is the print: {node.text}")
-                split = node.text.split(delimiters.get(text_type))
-                if bool(split[0]) == True:
-                    new_nodes.append(TextNode(split[0], text_type_text))
-                new_nodes.append(TextNode(split[1], text_type))
-                if bool(split[2]) == True:
-                    new_nodes.append(TextNode(split[2], text_type_text))
-            else:
-                new_nodes.append(node)
+    split = old_node.text.split(delimiter)
+    for i, item in enumerate(split):
+        if len(split) > 1 and "*" in split[i] and "*" in split[i+1]:
+            item += "*"
+            split[i+1] = split[i+1][1:]
+        if item == "":
+            continue
+        if i % 2 == 0:
+            new_nodes.append(TextNode(item, TextType.TEXT))
+        else:
+            new_nodes.append(TextNode(item, DELIMITER_TO_TYPE.get(delimiter)))
     return new_nodes
-###
-
-
-def test():
-    mkstring = "This is text with a ***bolded and not italicized*** sentence"
-    another_string = "`this is a code string`"
-    another_string2 = "this is a ~~wrong~~ correct string"
-    another_string3 = "`this is a ~~wrong~~ correct string in code`"
-    nodelist = [TextNode("This is text with a **bolded and not italicized** sentence", "bold")]
-    #TextNode("`this is a code string`", "code"),]
-    #TextNode("this is a ~~wrong~~ correct statement: Yoni sucks", "strikethrough")]
-    # print(mk_to_textnode(mkstring))
-    # print(mk_to_textnode(another_string))
-    # print(mk_to_textnode(another_string2))
-    # print(mk_to_textnode(another_string3))
-    print(text_nodes_delimiter(nodelist, text_type_bold))
-test()
-
-
+def split_nodes_delimiter(old_nodes: List[TextNode], delimiter: str) -> List[TextNode]:
+    new_nodes: List[TextNode] = []
+    for node in old_nodes:
+        new_nodes.extend(split_node_delimiter(node, delimiter))
+    return new_nodes
+def nested_nodes_unpacker(old_nodes: List[TextNode]):
+    unpacked_nodes: List[TextNode] = []
+    for node in old_nodes:
+        if node.text_type == TextType.TEXT:
+            unpacked_nodes.append(node)
+        else:
+            unpacked_nodes.extend(nest_checker(node))
+    return unpacked_nodes
+def nest_checker(node: TextNode):
+    new_nodes: List[TextNode] = []
+    if split_nodes_by_delimiters([TextNode(node.text, TextType.TEXT)])[0].text_type != TextType.TEXT and split_nodes_by_delimiters([TextNode(node.text, TextType.TEXT)])[0].text_type != node.text_type:
+        new_nodes.append(TextNode("", node.text_type))
+        new_nodes.extend(split_nodes_by_delimiters([TextNode(node.text, TextType.TEXT)]))
+        new_nodes.append(TextNode("", node.text_type))
+    else:
+        new_nodes.append(node)
+    return new_nodes
+def split_nodes_by_delimiters(nodes: List[TextNode]):
+    for delimiter in DELIMITER_TO_TYPE:
+        nodes = split_nodes_delimiter(nodes, delimiter)
+    return nested_nodes_unpacker(nodes)
 
 
         
-
-    

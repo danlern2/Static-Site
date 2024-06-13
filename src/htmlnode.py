@@ -1,5 +1,6 @@
 from textnode import TextNode
 from enum import Enum
+from markdown import *
 text_type_text = "text"
 text_type_bold = "bold"
 text_type_italic = "italic"
@@ -18,18 +19,21 @@ delimiters = {
 "italic": "*",
 "code_block": "```",
 "code": "`",
-"link": "[",
-"image": "!",
-"heading": "#" }
+"strikethrough": "~~",
+# "link": "[",
+# "image": "!",
+# "heading": "#"
+}
 delimiters2 = {
 "**": "bold",
 "*": "italic",
 "```": "code_block",
 "`": "code",
-"[": "link",
-"!": "image",
-"#": "heading" }
-
+"~~": "strikethrough",
+# "[": "link",
+# "!": "image",
+# "#": "heading" 
+}
 class HTMLNode():
     def __init__(self, tag=None, value=None, children=None, props=None):
         self.tag = tag
@@ -91,7 +95,7 @@ class LeafNode(HTMLNode):
 
 
 
-def text_node_to_html_node(text_node):
+def text_node_to_html_node(text_node: TextNode):
     if text_node.text_type not in type_rules:
         raise Exception(f"Invalid text type: {text_node.text_type}")
     elif text_node.text_type == text_type_text:
