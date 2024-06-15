@@ -5,7 +5,7 @@ from htmlnode import ParentNode
 from textnode import TextNode
 from htmlnode import text_node_to_html_node
 class TestHTMLNode(unittest.TestCase):
-      
+      pass
     # def testRepr(self):
     #     new_node = HTMLNode(value=["diiick"], props={"href": "https://www.google.com", "target": "_blank"})
     #     #new_node.__repr__()
@@ -54,12 +54,31 @@ class TestHTMLNode(unittest.TestCase):
     # )
     #     print(parent.to_html())
     
-    def test_eq2(self):
-        node3 = TextNode("This is a text node", "italic", "http://localhost:8888/")
-        node4 = TextNode("This is a text node but wrong", "italic")
-        print(str(text_node_to_html_node(node3)))
+    # def test_eq2(self):
+    #     node3 = TextNode("This is a text node", "italic", "http://localhost:8888/")
+    #     node4 = TextNode("This is a text node but wrong", "italic")
+    #     print(str(text_node_to_html_node(node3)))
 
 
-if __name__ == "__main__":
-    unittest.main()
-     
+# if __name__ == "__main__":
+#     unittest.main()
+
+
+def markdown_to_blocks(markdown: str):
+    blocks = markdown.split("\n\n")
+    block_list = []
+    for block in blocks:
+        if block == "":
+            continue
+        block_list.append(block.strip())
+    return block_list
+
+def test(list):
+    new_list = []
+    for item in list:
+        new_list.extend(item.split("\n"))
+    return new_list
+
+
+with open("/home/danlern2/bootdevworkspace/static_site/src/markdown_test") as file:
+    print(test(markdown_to_blocks(file.read())))

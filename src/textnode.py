@@ -59,6 +59,7 @@ class TextType(Enum):
 DELIMITER_TO_TYPE = {
     '**': TextType.BOLD,
     '*': TextType.ITALIC,
+    '_': TextType.ITALIC,
     '`': TextType.CODE,
 }
 
@@ -68,48 +69,47 @@ DELIMITER_TO_TYPE = {
 #     text_type: TextType
 #     url: Optional[str] = None
 
-def split_node_delimiter(old_node: TextNode, delimiter: str) -> List[TextNode]:
-    if old_node.text_type != TextType.TEXT:
-        return [old_node]
-    new_nodes = []
-    split = old_node.text.split(delimiter)
-    for i, item in enumerate(split):
-        if len(split) > 1 and "*" in split[i] and "*" in split[i+1]:
-            item += "*"
-            split[i+1] = split[i+1][1:]
-        if item == "":
-            continue
-        if i % 2 == 0:
-            new_nodes.append(TextNode(item, TextType.TEXT))
-        else:
-            new_nodes.append(TextNode(item, DELIMITER_TO_TYPE.get(delimiter)))
-    return new_nodes
-def split_nodes_delimiter(old_nodes: List[TextNode], delimiter: str) -> List[TextNode]:
-    new_nodes: List[TextNode] = []
-    for node in old_nodes:
-        new_nodes.extend(split_node_delimiter(node, delimiter))
-    return new_nodes
-def nested_nodes_unpacker(old_nodes: List[TextNode]):
-    unpacked_nodes: List[TextNode] = []
-    for node in old_nodes:
-        if node.text_type == TextType.TEXT:
-            unpacked_nodes.append(node)
-        else:
-            unpacked_nodes.extend(nest_checker(node))
-    return unpacked_nodes
-def nest_checker(node: TextNode):
-    new_nodes: List[TextNode] = []
-    if split_nodes_by_delimiters([TextNode(node.text, TextType.TEXT)])[0].text_type != TextType.TEXT and split_nodes_by_delimiters([TextNode(node.text, TextType.TEXT)])[0].text_type != node.text_type:
-        new_nodes.append(TextNode("", node.text_type))
-        new_nodes.extend(split_nodes_by_delimiters([TextNode(node.text, TextType.TEXT)]))
-        new_nodes.append(TextNode("", node.text_type))
-    else:
-        new_nodes.append(node)
-    return new_nodes
-def split_nodes_by_delimiters(nodes: List[TextNode]):
-    for delimiter in DELIMITER_TO_TYPE:
-        nodes = split_nodes_delimiter(nodes, delimiter)
-    return nested_nodes_unpacker(nodes)
-
-
-        
+#---------in markdown.py---------#
+# def split_node_delimiter(old_node: TextNode, delimiter: str) -> List[TextNode]:
+#     if old_node.text_type != TextType.TEXT:
+#         return [old_node]
+#     new_nodes = []
+#     split = old_node.text.split(delimiter)
+#     for i, item in enumerate(split):
+#         if len(split) > 1 and "*" in split[i] and "*" in split[i+1]:
+#             item += "*"
+#             split[i+1] = split[i+1][1:]
+#         if item == "":
+#             continue
+#         if i % 2 == 0:
+#             new_nodes.append(TextNode(item, TextType.TEXT))
+#         else:
+#             new_nodes.append(TextNode(item, DELIMITER_TO_TYPE.get(delimiter)))
+#     return new_nodes
+# def split_nodes_delimiter(old_nodes: List[TextNode], delimiter: str) -> List[TextNode]:
+#     new_nodes: List[TextNode] = []
+#     for node in old_nodes:
+#         new_nodes.extend(split_node_delimiter(node, delimiter))
+#     return new_nodes
+# def nested_nodes_unpacker(old_nodes: List[TextNode]):
+#     unpacked_nodes: List[TextNode] = []
+#     for node in old_nodes:
+#         if node.text_type == TextType.TEXT:
+#             unpacked_nodes.append(node)
+#         else:
+#             unpacked_nodes.extend(nest_checker(node))
+#     return unpacked_nodes
+# def nest_checker(node: TextNode):
+#     new_nodes: List[TextNode] = []
+#     if split_nodes_by_delimiters([TextNode(node.text, TextType.TEXT)])[0].text_type != TextType.TEXT and split_nodes_by_delimiters([TextNode(node.text, TextType.TEXT)])[0].text_type != node.text_type:
+#         new_nodes.append(TextNode("", node.text_type))
+#         new_nodes.extend(split_nodes_by_delimiters([TextNode(node.text, TextType.TEXT)]))
+#         new_nodes.append(TextNode("", node.text_type))
+#     else:
+#         new_nodes.append(node)
+#     return new_nodes
+# def split_nodes_by_delimiters(nodes: List[TextNode]):
+#     for delimiter in DELIMITER_TO_TYPE:
+#         nodes = split_nodes_delimiter(nodes, delimiter)
+#     return nested_nodes_unpacker(nodes)
+      

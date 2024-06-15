@@ -10,9 +10,6 @@ def split_node_delimiter(old_node: TextNode, delimiter: str) -> List[TextNode]:
     new_nodes = []
     split = old_node.text.split(delimiter)
     for i, item in enumerate(split):
-        # if len(split) > 1 and "*" in split[i] and "*" in split[i+1]:
-        #     item += "*"
-        #     split[i+1] = split[i+1][1:]
         if item == "":
             continue
         if i % 2 == 0:
@@ -24,7 +21,19 @@ def split_node_delimiter(old_node: TextNode, delimiter: str) -> List[TextNode]:
 def split_nodes_delimiter(old_nodes: List[TextNode], delimiter: str) -> List[TextNode]:
     new_nodes: List[TextNode] = []
     for node in old_nodes:
-        new_nodes.extend(split_node_delimiter(node, delimiter))
+    #------unordered list exception-----#
+        if delimiter == "*" and node.text[0:2] == "* ":
+            unordered_list_text = node.text[2:]
+            unordered_list_nodes = split_node_delimiter(TextNode(unordered_list_text, TextType.TEXT), delimiter)
+            if unordered_list_nodes[0].text != None:
+                unordered_list_nodes[0].text = "* " + unordered_list_nodes[0].text
+                new_nodes.extend(unordered_list_nodes)
+            else:
+                unordered_list_nodes[1].text = "* " + unordered_list_nodes[1].text
+                new_nodes.extend(unordered_list_nodes)
+    #------unordered list exception-----#
+        else:
+            new_nodes.extend(split_node_delimiter(node, delimiter))
     return new_nodes
 
 def nested_nodes_unpacker(old_nodes: List[TextNode]):
@@ -99,6 +108,12 @@ def text_to_textnodes(text) -> List[TextNode]:
     split_image = split_nodes_image(delimited)
     split_link = split_nodes_link(split_image)
     return split_link
+
+def text_list_to_textnodes(text_list):
+    textnodes = []
+    for item in text_list:
+        textnodes.extend(text_to_textnodes(item))
+    return textnodes
   
 #print(text_to_textnodes("This is **text** with an *italic* word and a `code block` and an ![image](https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/zjjcJKZ.png) and a [link](https://boot.dev)"))
 
@@ -135,7 +150,7 @@ def block_to_block_type(markdown_block: str) -> MKBlockType:
         return MKBlockType.Code
     elif markdown_block[0] == ">" and len(set([item[0] for item in markdown_block.split("\n")])) == 1:
         return MKBlockType.Quote
-    elif (markdown_block[0] == "-" or markdown_block[0] == "*") and set([item[0:2] for item in markdown_block.split("\n")]) <= set(["- ", "* "]):
+    elif (markdown_block[0] == "-" or markdown_block[0] == "*" or markdown_block[0] == "+" or markdown_block[0] == "-") and set([item[0:2] for item in markdown_block.split("\n")]) <= set(["- ", "* ", "+ ", "- "]):
         return MKBlockType.UnorderedList
     elif markdown_block.startswith("1. "):
         i = 1
@@ -146,7 +161,7 @@ def block_to_block_type(markdown_block: str) -> MKBlockType:
         return MKBlockType.OrderedList
     return MKBlockType.Paragraph
 
-print(block_to_block_type(">quote 1\n>quote 2\n>quote 3"))
-print(block_to_block_type("```this is a code block```"))
-print(block_to_block_type("- This is\n* an\n* unordered_list"))
-print(block_to_block_type("1. This is\n2. an\n3. ordered_list"))
+# print(block_to_block_type(">quote 1\n>quote 2\n>quote 3"))
+# print(block_to_block_type("```this is a code block```"))
+# print(block_to_block_type("- This is\n* an\n* unordered_list"))
+# print(block_to_block_type("1. This is\n2. an\n3. ordered_list"))
