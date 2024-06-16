@@ -1,6 +1,7 @@
 from textnode import *
 from enum import Enum
 from markdown_to_nodes import *
+from typing import Optional, List
 
 text_type_text = "text"
 text_type_bold = "bold"
@@ -56,9 +57,9 @@ class HTMLNode():
         print(f"Children: {self.children}")
         print(f"Props: {self.props}")
             
-
     def to_html(self):
         raise NotImplementedError
+    
     def props_to_html(self):
         prop = ""
         if self.props is None:
@@ -67,8 +68,19 @@ class HTMLNode():
             prop += f' {key}="{self.props[str(key)]}"'
         return prop
 
+class LeafNode(HTMLNode):
+    def __init__(self, tag, value, props=None):
+        super().__init__(tag, value, None, props)
+    
+    def to_html(self):
+        if self.value == None:
+            raise ValueError
+        if self.tag == None:
+            return self.value
+        return f'<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>'
+
 class ParentNode(HTMLNode):
-    def __init__(self, tag=None, children=None, props=None):
+    def __init__(self, tag, children=[None], props=None):
         super().__init__(tag, None, children, props)
     
     def to_html(self):
@@ -82,17 +94,6 @@ class ParentNode(HTMLNode):
             html_string += child.to_html()
         html_string += f'</{self.tag}>'
         return html_string
-
-class LeafNode(HTMLNode):
-    def __init__(self, tag=None, value=None, props=None):
-        super().__init__(tag, value, None, props)
-    
-    def to_html(self):
-        if self.value == None:
-            raise ValueError
-        if self.tag == None:
-            return self.value
-        return f'<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>'
 
 def text_node_to_html_node(text_node: TextNode):
     if text_node.text_type not in TextType:
@@ -160,16 +161,18 @@ def mk_doc_to_html_node(markdown_doc):
     return ParentNode(tag="div", children=block_html_nodes)
 
 def heading_block_to_html_node(heading_block):
-    children = mk_block_child_unpacker(heading_block)
+    children = []
+    children.append(mk_block_child_unpacker(heading_block))
     return ParentNode(tag=f"h{heading_block[0:6].count("#")}", children=children)
 
 def code_block_to_html_node(code_block):
     children = []
-    children.append(LeafNode("code", code_block))
+    children.append(ParentNode("code", code_block))
     return ParentNode(tag="pre", children=children)
 
 def quote_block_to_html_node(quote_block):
-    children = mk_block_child_unpacker(quote_block)
+    children = []
+    children.append(mk_block_child_unpacker(quote_block))
     return ParentNode(tag="blockquote", children=children)
 
 def unordered_list_to_html_node(unordered_list_block):
@@ -187,18 +190,19 @@ def ordered_list_block_to_html_node(ordered_list_block):
     return ParentNode(tag="ol", children=children)
 
 def paragraph_block_to_html_node(paragraph_block):
-    children = mk_block_child_unpacker(paragraph_block)
+    children = []
+    children.append(mk_block_child_unpacker(paragraph_block))
     return ParentNode("p", children=children)
 
 
 
 
-def test(markdown):
-    textnodes = block_to_textnodes(markdown)
-    print(f"{textnodes}")
-    htmlnodes = textnodes_to_html(textnodes)
-    print(f"{htmlnodes}")
-    return htmlnodes
+# def test(markdown):
+#     textnodes = block_to_textnodes(markdown)
+#     print(f"{textnodes}")
+#     htmlnodes = textnodes_to_html(textnodes)
+#     print(f"{htmlnodes}")
+#     return htmlnodes
 
 
 # with open("/home/danlern2/bootdevworkspace/static_site/src/markdown_test") as file:

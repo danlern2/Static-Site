@@ -133,8 +133,8 @@ def markdown_to_blocks(markdown: str):
             continue
         block_list.append(block.strip())
     return block_list
-with open("/home/danlern2/bootdevworkspace/static_site/src/markdown_test") as file:
-    markdown_to_blocks(file.read())
+# with open("/home/danlern2/bootdevworkspace/static_site/src/markdown_test") as file:
+#     markdown_to_blocks(file.read())
 
 def block_to_block_type(markdown_block: str) -> MKBlockType:
     if (
