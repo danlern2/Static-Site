@@ -80,8 +80,11 @@ class LeafNode(HTMLNode):
         return f'<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>'
 
 class ParentNode(HTMLNode):
-    def __init__(self, tag, children=[None], props=None):
+    def __init__(self, tag, children, props=None):
         super().__init__(tag, None, children, props)
+        # if children:
+        for child in children:
+            assert isinstance(child, HTMLNode)
     
     def to_html(self):
         if self.tag is None:
@@ -124,7 +127,8 @@ def mk_block_child_unpacker(block):
 
 def block_to_textnodes(block):
     textnodes = []
-    split = block.split("\n")
+    # split = block.splitlines(keepends=True)
+    split = block.split("\n\n")
     for line in split:
         textnodes.extend(text_to_textnodes(line))
     return textnodes
@@ -162,47 +166,50 @@ def mk_doc_to_html_node(markdown_doc):
 
 def heading_block_to_html_node(heading_block):
     children = []
-    children.append(mk_block_child_unpacker(heading_block))
+    stripped = heading_block[heading_block[0:6].count("#")+1:]
+    children.extend(mk_block_child_unpacker(stripped))
     return ParentNode(tag=f"h{heading_block[0:6].count("#")}", children=children)
 
 def code_block_to_html_node(code_block):
     children = []
-    children.append(ParentNode("code", code_block))
+    stripped = code_block.strip("```")
+    children.append(LeafNode("code", value=stripped))
     return ParentNode(tag="pre", children=children)
 
 def quote_block_to_html_node(quote_block):
     children = []
-    children.append(mk_block_child_unpacker(quote_block))
+    stripped = quote_block.replace(">", "\n")
+    children.extend(mk_block_child_unpacker(stripped))
     return ParentNode(tag="blockquote", children=children)
 
 def unordered_list_to_html_node(unordered_list_block):
     children = []   
     inline_children = mk_block_child_unpacker(unordered_list_block)
     for child in inline_children:
-        children.append(ParentNode("li", children=child))
+        child.value = child.value[2:]
+        children.append(ParentNode("li", children=[child]))
     return ParentNode(tag="ul", children=children)
 
 def ordered_list_block_to_html_node(ordered_list_block):
     children = []
     inline_children = mk_block_child_unpacker(ordered_list_block)
     for child in inline_children:
-        children.append(ParentNode("li", children=child))
+        child.value = child.value[3:]
+        children.append(ParentNode("li", children=[child]))
     return ParentNode(tag="ol", children=children)
 
 def paragraph_block_to_html_node(paragraph_block):
     children = []
-    children.append(mk_block_child_unpacker(paragraph_block))
+    children.extend(mk_block_child_unpacker(paragraph_block))
     return ParentNode("p", children=children)
 
 
-
-
-# def test(markdown):
-#     textnodes = block_to_textnodes(markdown)
-#     print(f"{textnodes}")
-#     htmlnodes = textnodes_to_html(textnodes)
-#     print(f"{htmlnodes}")
-#     return htmlnodes
+def test(markdown):
+    textnodes = block_to_textnodes(markdown)
+    print(f"{textnodes}")
+    htmlnodes = textnodes_to_html(textnodes)
+    print(f"{htmlnodes}")
+    return htmlnodes
 
 
 # with open("/home/danlern2/bootdevworkspace/static_site/src/markdown_test") as file:
@@ -211,4 +218,4 @@ def paragraph_block_to_html_node(paragraph_block):
 
 # print(f"\n{textnodes_to_html(block_to_textnodes("Markdown uses email-style `>` characters for blockquoting. If you're\nfamiliar with quoting passages of text in an email message, then you\nknow how to create a blockquote in Markdown. It looks best if you hard\nwrap the text and put a `>` before every line:"))}")
 
-# test("Markdown uses email-style `>` characters for blockquoting. If you're\nfamiliar with quoting passages of text in an email message, then you\nknow how to create a blockquote in Markdown. It looks best if you hard\nwrap the text and put a `>` before every line:")
+test("### Markdown\n\nuses email-style `>` characters for blockquoting. If you're\nfamiliar with quoting passages of text in an email message, then you\nknow how to create a blockquote in Markdown. It looks best if you hard\nwrap the text and put a `>` before every line:")
