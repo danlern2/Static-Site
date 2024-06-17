@@ -8,13 +8,14 @@ from page_generator import *
 
 
 def main():
-    copy = "/home/danlern2/bootdevworkspace/static_site/static"
-    target = "/home/danlern2/bootdevworkspace/static_site/public"
+    copy = "./static_site/static/"
+    target = "./static_site/public/"
     print(f"Setting up directory at {target}")
     if os.path.exists(target):
         print("Removing old files")
         shutil.rmtree(target)
     directory_copier(copy, target)
-    generate_page("/home/danlern2/bootdevworkspace/static_site/content/index.md", "/home/danlern2/bootdevworkspace/static_site/template.html", "/home/danlern2/bootdevworkspace/static_site/public/index.html")
+    generate_pages_recursive("./static_site/content/", "./static_site/template.html", "./static_site/public/")
+    # generate_page("./static_site/content/", "./static_site/template.html", "./static_site/public/")
     # print()
 main()
