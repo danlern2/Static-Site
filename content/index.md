@@ -1,3 +1,3 @@
 # Tolkien Fan Club
 
-I like Tolkien. Read my [first post here](/public/majesty/index.md)
+I like Tolkien. Read my [first post here](./majesty/index)
