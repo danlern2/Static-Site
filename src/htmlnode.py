@@ -214,18 +214,18 @@ def paragraph_block_to_html_node(paragraph_block):
     return ParentNode("p", children=children)
 
 
-def test(markdown):
-    html_nodes = mk_doc_to_html_node(markdown)
-    print(html_nodes)
-    # textnodes = block_to_textnodes(markdown)
-    # print(f"{textnodes}")
-    # htmlnodes = textnodes_to_html(textnodes)
-    # print(f"{htmlnodes}")
-    return html_nodes
+# def test(markdown):
+#     html_nodes = mk_doc_to_html_node(markdown)
+#     print(html_nodes)
+#     # textnodes = block_to_textnodes(markdown)
+#     # print(f"{textnodes}")
+#     # htmlnodes = textnodes_to_html(textnodes)
+#     # print(f"{htmlnodes}")
+#     return html_nodes
 
 
-# with open("/home/danlern2/bootdevworkspace/static_site/src/markdown_test") as file:
-#     print(f"\n\n{[mk_doc_to_html_node(file.read())]}\n")
+# with open("./static_site/src/markdown_test") as file:
+    # print(f"\n\n{[mk_doc_to_html_node(file.read())]}\n")
 
 
 # print(f"\n{textnodes_to_html(block_to_textnodes("Markdown uses email-style `>` characters for blockquoting. If you're\nfamiliar with quoting passages of text in an email message, then you\nknow how to create a blockquote in Markdown. It looks best if you hard\nwrap the text and put a `>` before every line:"))}")

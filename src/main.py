@@ -3,18 +3,22 @@ from htmlnode import *
 from markdown_to_nodes import *
 import os
 import shutil
+from pathlib import Path
 from copystatic import *
 from page_generator import *
 
 
 def main():
-    copy = "/home/danlern2/bootdevworkspace/static_site/static"
-    target = "/home/danlern2/bootdevworkspace/static_site/public"
-    print(f"Setting up directory at {target}")
-    if os.path.exists(target):
+    content = pathlib.Path(os.path.abspath(os.path.expanduser(os.path.expandvars("./static_site/content"))))
+    static = pathlib.Path(os.path.abspath(os.path.expanduser(os.path.expandvars("./static_site/static"))))
+    template = pathlib.Path(os.path.abspath(os.path.expanduser(os.path.expandvars("./static_site/template.html"))))
+    dest_path = pathlib.Path(os.path.abspath(os.path.expanduser(os.path.expandvars("./static_site/public"))))
+    print(f"Setting up directory at {dest_path}")
+    if os.path.exists(dest_path):
         print("Removing old files")
-        shutil.rmtree(target)
-    directory_copier(copy, target)
-    generate_page("/home/danlern2/bootdevworkspace/static_site/content/index.md", "/home/danlern2/bootdevworkspace/static_site/template.html", "/home/danlern2/bootdevworkspace/static_site/public/index.html")
-    # print()
+        shutil.rmtree(dest_path)
+        print("Creating files:")
+    directory_copier(static, dest_path)
+    generate_pages_recursive(content, template, dest_path)
+    
 main()

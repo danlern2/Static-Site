@@ -3,6 +3,7 @@ from textnode import *
 from htmlnode import *
 from copystatic import *
 import os
+import pathlib
 
 def generate_page(from_path, template_path, dest_path):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
@@ -26,6 +27,13 @@ def extract_title(markdown_doc):
             return block
     raise Exception("Submitted document requires an h1 header")
 
-
-
-generate_page("/home/danlern2/bootdevworkspace/static_site/content/index.md", "/home/danlern2/bootdevworkspace/static_site/template.html", "/home/danlern2/bootdevworkspace/static_site/public/index.html")
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    if os.path.isfile(dir_path_content) == True and os.path.split(dir_path_content)[1].endswith(".md"):
+        new_html = dest_dir_path[:-2] + "html"
+        return generate_page(dir_path_content, template_path, new_html)
+    elif os.path.isdir(dir_path_content):
+        for item in os.listdir(dir_path_content):
+            new_path = os.path.join(dir_path_content, item)
+            new_dest = os.path.join(dest_dir_path, item)
+            generate_pages_recursive(new_path, template_path, new_dest)
+    return
