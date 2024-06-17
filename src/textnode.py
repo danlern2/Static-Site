@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional, List
 from dataclasses import dataclass
-#from htmlnode import Type_Rules
+import re
 text_type_text = "text"
 text_type_bold = "bold"
 text_type_italic = "italic"
@@ -49,18 +49,24 @@ class TextNode():
         return f"TextNode({self.text}, {self.text_type}, {self.url})"
 
 class TextType(Enum):
-    TEXT = "TEXT"
-    BOLD = "BOLD"
-    ITALIC = "ITALIC"
-    CODE = "CODE"
-    LINK = "LINK"
-    IMAGE = "IMAGE"
+    TEXT = "text"
+    BOLD = "bold"
+    ITALIC = "italic"
+    CODE = "code"
+    LINK = "link"
+    IMAGE = "image"
 
 DELIMITER_TO_TYPE = {
     '**': TextType.BOLD,
     '*': TextType.ITALIC,
-    '_': TextType.ITALIC,
+   # '_': TextType.ITALIC,
     '`': TextType.CODE,
+}
+REGEX_TO_TYPE = {
+    re.compile(r"(\*\*\b)|(\b\*\*)"): TextType.BOLD,
+    re.compile(r"(__\b)|(\b__)"): TextType.BOLD,
+    re.compile(r"(\*\b)|(\b\*)"): TextType.ITALIC,
+    re.compile(r"(_\b)|(\b_)"): TextType.ITALIC
 }
 
 # @dataclass()

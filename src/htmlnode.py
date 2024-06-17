@@ -173,7 +173,10 @@ def heading_block_to_html_node(heading_block):
 def code_block_to_html_node(code_block):
     children = []
     stripped = code_block.strip("```")
-    children.append(LeafNode("code", value=stripped))
+    stripped2 = stripped.lstrip("\n\r\x1d\x1e\u2028\u2029")
+    children.append(LeafNode("code", value=stripped2))
+    if bool(children) == False:
+                assert("inline children is empty")
     return ParentNode(tag="pre", children=children)
 
 def quote_block_to_html_node(quote_block):
@@ -183,19 +186,26 @@ def quote_block_to_html_node(quote_block):
     return ParentNode(tag="blockquote", children=children)
 
 def unordered_list_to_html_node(unordered_list_block):
-    children = []   
-    inline_children = mk_block_child_unpacker(unordered_list_block)
-    for child in inline_children:
-        child.value = child.value[2:]
-        children.append(ParentNode("li", children=[child]))
+    children = []
+    inline_children = []
+    for line in unordered_list_block.split("\n"):
+        if (line[0] == "-" or line[0] == "*" or line[0] == "+" or line[0] == "-") and set([item[0:2] for item in unordered_list_block.split("\n")]) <= set(["- ", "* ", "+ ", "- "]):
+            inline_children.extend(textnodes_to_html(text_to_textnodes(line[2:])))
+            children.append(ParentNode("li", children=inline_children))
+            if bool(inline_children) == False:
+                assert("inline children is empty")
+            inline_children = []
     return ParentNode(tag="ul", children=children)
 
 def ordered_list_block_to_html_node(ordered_list_block):
     children = []
-    inline_children = mk_block_child_unpacker(ordered_list_block)
-    for child in inline_children:
-        child.value = child.value[3:]
-        children.append(ParentNode("li", children=[child]))
+    inline_children = []
+    for line in ordered_list_block.split("\n"):
+        inline_children.extend(textnodes_to_html(text_to_textnodes(line[3:])))
+        children.append(ParentNode("li", children=inline_children))
+        if bool(inline_children) == False:
+            assert("inline children is empty")
+        inline_children = []
     return ParentNode(tag="ol", children=children)
 
 def paragraph_block_to_html_node(paragraph_block):
@@ -205,11 +215,13 @@ def paragraph_block_to_html_node(paragraph_block):
 
 
 def test(markdown):
-    textnodes = block_to_textnodes(markdown)
-    print(f"{textnodes}")
-    htmlnodes = textnodes_to_html(textnodes)
-    print(f"{htmlnodes}")
-    return htmlnodes
+    html_nodes = mk_doc_to_html_node(markdown)
+    print(html_nodes)
+    # textnodes = block_to_textnodes(markdown)
+    # print(f"{textnodes}")
+    # htmlnodes = textnodes_to_html(textnodes)
+    # print(f"{htmlnodes}")
+    return html_nodes
 
 
 # with open("/home/danlern2/bootdevworkspace/static_site/src/markdown_test") as file:
@@ -218,4 +230,4 @@ def test(markdown):
 
 # print(f"\n{textnodes_to_html(block_to_textnodes("Markdown uses email-style `>` characters for blockquoting. If you're\nfamiliar with quoting passages of text in an email message, then you\nknow how to create a blockquote in Markdown. It looks best if you hard\nwrap the text and put a `>` before every line:"))}")
 
-test("### Markdown\n\nuses email-style `>` characters for blockquoting. If you're\nfamiliar with quoting passages of text in an email message, then you\nknow how to create a blockquote in Markdown. It looks best if you hard\nwrap the text and put a `>` before every line:")
+# test("### Markdown\n\nuses email-style `>` characters for blockquoting. If you're\nfamiliar with quoting passages of text in an email message, then you\nknow how to create a blockquote in Markdown. It looks best if you hard\nwrap the text and put a `>` before every line:")
