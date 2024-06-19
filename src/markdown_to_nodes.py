@@ -1,9 +1,9 @@
-from textnode import (TextNode, TextType, type_rules, delimiters, delimiters2, DELIMITER_TO_TYPE)
-from typing import Optional, List
+from textnode import TextNode, TextType, DELIMITER_TO_TYPE
+from typing import List
 from enum import Enum
 import re
 
-#-----------------------------Inline Markdown------------------------------#
+# -----------------------------Inline Markdown------------------------------#
 # def split_node_delimiter(old_node: TextNode, delimiter: str) -> List[TextNode]:
 #     if old_node.text_type != TextType.TEXT:
 #         return [old_node]
@@ -83,7 +83,7 @@ import re
 #             if len(split) > 1 and bool(split[1]) == True:
 #                 new_nodes.extend(split_nodes_image([TextNode(split[1], TextType.IMAGE)]))
 #     return new_nodes
-            
+
 # def split_nodes_link(old_nodes: List[TextNode]) -> List[TextNode]:
 #     new_nodes = []
 #     link_pattern = re.compile(r"\[(.*?)\]\((.*?)\)")
@@ -109,15 +109,18 @@ import re
 #     split_link = split_nodes_link(split_image)
 #     return split_link
 
+
 def text_list_to_textnodes(text_list):
     textnodes = []
     for item in text_list:
         textnodes.extend(text_to_textnodes(item))
     return textnodes
-  
-#print(text_to_textnodes("This is **text** with an *italic* word and a `code block` and an ![image](https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/zjjcJKZ.png) and a [link](https://boot.dev)"))
 
-#--------------Markdown blocks-------------#
+
+# print(text_to_textnodes("This is **text** with an *italic* word and a `code block` and an ![image](https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/zjjcJKZ.png) and a [link](https://boot.dev)"))
+
+
+# --------------Markdown blocks-------------#
 class MKBlockType(Enum):
     Paragraph = "paragraph"
     Heading = "heading"
@@ -126,16 +129,20 @@ class MKBlockType(Enum):
     UnorderedList = "unordered_list"
     OrderedList = "ordered_list"
 
-def markdown_to_blocks(markdown: str):
+
+def markdown_to_blocks(markdown: str) -> list[str]:
     blocks = markdown.split("\n\n")
-    block_list = []
+    block_list: list[str] = []
     for block in blocks:
         if block == "":
             continue
         block_list.append(block.strip())
     return block_list
+
+
 # with open("/home/danlern2/bootdevworkspace/static_site/src/markdown_test") as file:
 #     markdown_to_blocks(file.read())
+
 
 def block_to_block_type(markdown_block: str) -> MKBlockType:
     if (
@@ -147,11 +154,24 @@ def block_to_block_type(markdown_block: str) -> MKBlockType:
         or markdown_block.startswith("###### ")
     ):
         return MKBlockType.Heading
-    elif markdown_block[0:3] == "```" and markdown_block[-3:len(markdown_block)] == "```":
+    elif (
+        markdown_block[0:3] == "```"
+        and markdown_block[-3 : len(markdown_block)] == "```"
+    ):
         return MKBlockType.Code
-    elif markdown_block[0] == ">" and len(set([item[0] for item in markdown_block.split("\n")])) == 1:
+    elif (
+        markdown_block[0] == ">"
+        and len(set([item[0] for item in markdown_block.split("\n")])) == 1
+    ):
         return MKBlockType.Quote
-    elif (markdown_block[0] == "-" or markdown_block[0] == "*" or markdown_block[0] == "+" or markdown_block[0] == "-") and set([item[0:2] for item in markdown_block.split("\n")]) <= set(["- ", "* ", "+ ", "- "]):
+    elif (
+        markdown_block[0] == "-"
+        or markdown_block[0] == "*"
+        or markdown_block[0] == "+"
+        or markdown_block[0] == "-"
+    ) and set([item[0:2] for item in markdown_block.split("\n")]) <= set(
+        ["- ", "* ", "+ ", "- "]
+    ):
         return MKBlockType.UnorderedList
     elif markdown_block.startswith("1. "):
         i = 1
@@ -162,44 +182,52 @@ def block_to_block_type(markdown_block: str) -> MKBlockType:
         return MKBlockType.OrderedList
     return MKBlockType.Paragraph
 
+
 # print(block_to_block_type(">quote 1\n>quote 2\n>quote 3"))
 # print(block_to_block_type("```this is a code block```"))
 # print(block_to_block_type("- This is\n* an\n* unordered_list"))
 # print(block_to_block_type("1. This is\n2. an\n3. ordered_list"))
 
-#------------New split node delimiter------------#
+
+# ------------New split node delimiter------------#
 def delimiter_loop_on_textnodes(nodes: List[TextNode]) -> List[TextNode]:
     """
     For each delimiter, send the list of TextNodes to textnodes_loop_with_delimiter(nodes, delimiter)\n
     textnodes_loop_with_delimiter will return a new list of nodes separated by the given delimiter and return a new list\n
     This is will go until all the delimiters are accounted for.\n
     At the end, this will return a fully and properly delimited set of TextNodes including nested ones.
-    """ 
+    """
     for delimiter in DELIMITER_TO_TYPE:
         nodes = textnodes_loop_with_delimiter(nodes, delimiter)
     # print(nodes)
     return nodes
 
-def textnodes_loop_with_delimiter(nodes: List[TextNode], delimiter: str) -> list[TextNode]:
+
+def textnodes_loop_with_delimiter(
+    nodes: List[TextNode], delimiter: str
+) -> list[TextNode]:
     """
     Takes a list of TextNodes and a delimiter. Will send each node in the list and the given delimiter to the split_node_delimiter function and will extend that result to a new list of nodes.\n
     """
     new_nodes = []
     for node in nodes:
-    #------unordered list exception-----#
+        # ------unordered list exception-----#
         if delimiter == "*" and node.text[0:2] == "* ":
             unordered_list_text: str = node.text[2:]
-            unordered_list_nodes = split_node_delimiter(TextNode(unordered_list_text, TextType.TEXT), delimiter)
-            if unordered_list_nodes[0].text != None:
+            unordered_list_nodes = split_node_delimiter(
+                TextNode(unordered_list_text, TextType.TEXT), delimiter
+            )
+            if unordered_list_nodes[0].text is not None:
                 unordered_list_nodes[0].text = "* " + unordered_list_nodes[0].text
                 new_nodes.extend(unordered_list_nodes)
             else:
                 unordered_list_nodes[1].text = "* " + unordered_list_nodes[1].text
                 new_nodes.extend(unordered_list_nodes)
-    #------unordered list exception-----#
+        # ------unordered list exception-----#
         else:
-            new_nodes.extend(split_node_delimiter(node, delimiter))    
+            new_nodes.extend(split_node_delimiter(node, delimiter))
     return new_nodes
+
 
 def split_node_delimiter(node: TextNode, delimiter: str) -> List[TextNode]:
     """
@@ -224,27 +252,31 @@ def split_node_delimiter(node: TextNode, delimiter: str) -> List[TextNode]:
         i = text.index(delimiter)
         # If there is no match for the delimiter in the rest of the text then its not a true case of that delimiter
         # and append it as is
-        if delimiter not in text[i+len(delimiter):]:
+        if delimiter not in text[i + len(delimiter) :]:
             new_nodes.append(node)
         # If i is not at the start of the text then make that slice from 0 - i of the text a new TextNode and append it to the list.
         if i != 0:
             new_nodes.append(TextNode(text[:i], TextType.TEXT))
         # Set x to the value of the next index where you find the delimiter
-        x = text[i+len(delimiter):].index(delimiter) + len(text[:i+len(delimiter)])
+        x = text[i + len(delimiter) :].index(delimiter) + len(
+            text[: i + len(delimiter)]
+        )
         x += len(delimiter)
         # Check if x is the outside delimiter, and if its not, make it.
         if x != len(text) and text[x] == delimiter[0]:
-            x += 1 
+            x += 1
         # Send the delimited text to the splitter, and extend the results into new_nodes
         new_nodes.extend(splitter(text[i:x], delimiter))
         # If its not the end of the node's text, send the remainder back through this function.
         if x != len(text):
-            new_nodes.extend(split_node_delimiter(TextNode(text[x:], TextType.TEXT), delimiter))
+            new_nodes.extend(
+                split_node_delimiter(TextNode(text[x:], TextType.TEXT), delimiter)
+            )
     else:
         new_nodes.append(node)
-     
+
     return new_nodes
-        
+
 
 def splitter(text: str, delimiter) -> List[TextNode]:
     """
@@ -279,53 +311,61 @@ def splitter(text: str, delimiter) -> List[TextNode]:
         new_nodes.append(TextNode("", DELIMITER_TO_TYPE.get(delimiter)))
     return new_nodes
 
+
 def nest_checker(text):
     for delim in DELIMITER_TO_TYPE:
         if delim in text:
             return True
     return False
 
+
 def extract_markdown_images(text) -> List[tuple]:
     return re.findall(r"!\[(.*?)\]\((.*?)\)", text)
 
+
 def extract_markdown_links(text) -> List[tuple]:
     return re.findall(r"\[(.*?)\]\((.*?)\)", text)
+
 
 def split_nodes_image(old_nodes: List[TextNode]) -> List[TextNode]:
     new_nodes = []
     image_pattern = re.compile(r"!\[(.*?)\]\((.*?)\)")
     for node in old_nodes:
-        if image_pattern.search(node.text) == None:
+        if image_pattern.search(node.text) is None:
             if node.text_type == TextType.IMAGE:
                 node.text_type = TextType.TEXT
             new_nodes.append(node)
         else:
             images = extract_markdown_images(node.text)
             split = node.text.split(f"![{images[0][0]}]({images[0][1]})", 1)
-            if bool(split[0]) == True:
+            if bool(split[0]) is True:
                 new_nodes.append(TextNode(split[0], TextType.TEXT))
             new_nodes.append(TextNode(images[0][0], TextType.IMAGE, images[0][1]))
-            if len(split) > 1 and bool(split[1]) == True:
-                new_nodes.extend(split_nodes_image([TextNode(split[1], TextType.IMAGE)]))
+            if len(split) > 1 and bool(split[1]) is True:
+                new_nodes.extend(
+                    split_nodes_image([TextNode(split[1], TextType.IMAGE)])
+                )
     return new_nodes
-            
+
+
 def split_nodes_link(old_nodes: List[TextNode]) -> List[TextNode]:
     new_nodes = []
     link_pattern = re.compile(r"\[(.*?)\]\((.*?)\)")
     for node in old_nodes:
-        if link_pattern.search(node.text) == None:
+        if link_pattern.search(node.text) is None:
             if node.text_type == TextType.LINK:
                 node.text_type = TextType.TEXT
             new_nodes.append(node)
         else:
             links = extract_markdown_links(node.text)
             split = node.text.split(f"[{links[0][0]}]({links[0][1]})", 1)
-            if bool(split[0]) == True:
+            if bool(split[0]) is True:
                 new_nodes.append(TextNode(split[0], TextType.TEXT))
             new_nodes.append(TextNode(links[0][0], TextType.LINK, links[0][1]))
-            if len(split) > 1 and bool(split[1]) == True:
+            if len(split) > 1 and bool(split[1]) is True:
                 new_nodes.extend(split_nodes_link([TextNode(split[1], TextType.LINK)]))
     return new_nodes
+
 
 def text_to_textnodes(text) -> List[TextNode]:
     node = TextNode(text, TextType.TEXT)
@@ -333,6 +373,12 @@ def text_to_textnodes(text) -> List[TextNode]:
     split_image = split_nodes_image(delimited)
     split_link = split_nodes_link(split_image)
     return split_link
+
+
 # print(split_node_delimiter(TextNode("This is __bolded and _italicized___ even if you think its not, because ___Markdown___ is very `_weird_`", TextType.TEXT), "__"))
 # print(delimiter_loop_on_textnodes([TextNode("This is __bolded and _italicized___ even if you think its not, because ___Markdown___ is very `_weird_`", TextType.TEXT)]))
-print(delimiter_loop_on_textnodes([TextNode("hello, **This is your *captain* speaking**", TextType.TEXT)]))
+print(
+    delimiter_loop_on_textnodes(
+        [TextNode("hello, **This is your *captain* speaking**", TextType.TEXT)]
+    )
+)
