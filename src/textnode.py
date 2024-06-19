@@ -1,3 +1,4 @@
+from __future__ import annotations
 from enum import Enum
 import re
 
@@ -31,12 +32,12 @@ delimiters2 = {
 
 
 class TextNode:
-    def __init__(self, text, text_type, url=None):
-        self.text = text
-        self.text_type = text_type
-        self.url = url
+    def __init__(self, text: str, text_type: str, url: str | None = None):
+        self.text: str = text
+        self.text_type: str = text_type
+        self.url: str | None = url
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self: TextNode, other: TextNode) -> bool:  # type: ignore
         if (
             self.text == other.text
             and self.text_type == other.text_type
@@ -50,12 +51,12 @@ class TextNode:
 
 
 class TextType(Enum):
-    TEXT = "text"
-    BOLD = "bold"
-    ITALIC = "italic"
-    CODE = "code"
-    LINK = "link"
-    IMAGE = "image"
+    TEXT: str = "text"
+    BOLD: str = "bold"
+    ITALIC: str = "italic"
+    CODE: str = "code"
+    LINK: str = "link"
+    IMAGE: str = "image"
 
 
 DELIMITER_TO_TYPE = {

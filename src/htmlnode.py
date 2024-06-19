@@ -43,15 +43,15 @@ class HTMLNode:
         tag: str | None = None,
         value: str | None = None,
         children: list[HTMLNode] | None = None,
-        props=None,
-    ):  # type: ignore
+        props: dict[str | None, str | None] | None = None,
+    ):
         self.tag = tag
         self.value = value
         self.children: list[HTMLNode] | None = children
-        self.props = props  # type: ignore
+        self.props = props
 
     def __repr__(self):
-        return f"HTMLNode({self.tag}, {self.value}, {self.children}, {self.props})"  # type: ignore
+        return f"HTMLNode({self.tag}, {self.value}, {self.children}, {self.props})"
 
     def print_details(self):
         print(f"Tags: {self.tag}")
@@ -62,25 +62,27 @@ class HTMLNode:
         else:
             print(f"Value: {self.value[0:10]} ...{self.value[-20:len(self.value)]}")
         print(f"Children: {self.children}")
-        print(f"Props: {self.props}")  # type: ignore
+        print(f"Props: {self.props}")
 
-    def to_html(self):  # type: ignore
+    def to_html(self) -> str | None:
         raise NotImplementedError
 
     def props_to_html(self):
         prop = ""
-        if self.props is None:  # type: ignore
+        if self.props is None:
             return prop
-        for key in self.props:  # type: ignore
-            prop += f' {key}="{self.props[str(key)]}"'  # type: ignore
+        for key in self.props:
+            prop += f' {key}="{self.props[str(key)]}"'
         return prop
 
 
 class LeafNode(HTMLNode):
-    def __init__(self, tag, value, props=None):  # type: ignore
-        super().__init__(tag, value, None, props)  # type: ignore
+    def __init__(
+        self, tag: str, value: str, props: dict[str | None, str | None] | None = None
+    ):
+        super().__init__(tag, value, None, props)
 
-    def to_html(self):
+    def to_html(self) -> str | None:
         if self.value is None:
             raise ValueError
         if self.tag is None:
@@ -89,8 +91,13 @@ class LeafNode(HTMLNode):
 
 
 class ParentNode(HTMLNode):
-    def __init__(self, tag: str, children, props=None):  # type: ignore
-        super().__init__(tag, None, children, props)  # type: ignore
+    def __init__(
+        self,
+        tag: str,
+        children: list[HTMLNode],
+        props: dict[str | None, str | None] | None = None,
+    ):
+        super().__init__(tag, None, children, props)
         # if children:
         for child in children:
             assert isinstance(child, HTMLNode)
@@ -100,7 +107,7 @@ class ParentNode(HTMLNode):
             raise ValueError("Missing tag argument.")
         elif self.children is None or bool(self.children) is False:
             raise ValueError("Missing children argument.")
-        html_string = ""
+        html_string: str = ""
         html_string += f"<{self.tag}{self.props_to_html()}>"
         for child in self.children:
             html_string += child.to_html()  # type: ignore
@@ -108,30 +115,30 @@ class ParentNode(HTMLNode):
         return html_string  # type: ignore
 
 
-def text_node_to_html_node(text_node: TextNode):
+def text_node_to_html_node(text_node: TextNode) -> HTMLNode | None:
     if text_node.text_type not in TextType:
         raise Exception(f"Invalid text type: {text_node.text_type}")
     elif text_node.text_type == TextType.TEXT:
-        return LeafNode(tag=None, value=text_node.text)
-    elif text_node.text_type == TextType.BOLD:  # type: ignore
+        return LeafNode(tag=None, value=text_node.text)  # type: ignore
+    elif text_node.text_type == TextType.BOLD:
         return LeafNode(tag="b", value=text_node.text)
-    elif text_node.text_type == TextType.ITALIC:  # type: ignore
+    elif text_node.text_type == TextType.ITALIC:
         return LeafNode(tag="i", value=text_node.text)
-    elif text_node.text_type == TextType.CODE:  # type: ignore
+    elif text_node.text_type == TextType.CODE:
         return LeafNode(tag="code", value=text_node.text)
-    elif text_node.text_type == TextType.LINK:  # type: ignore
-        return LeafNode(tag="a", value=text_node.text, props={"href": text_node.url})  # type: ignore
-    elif text_node.text_type == TextType.IMAGE:  # type: ignore
+    elif text_node.text_type == TextType.LINK:
+        return LeafNode(tag="a", value=text_node.text, props={"href": text_node.url})
+    elif text_node.text_type == TextType.IMAGE:
         return LeafNode(
             tag="img",
             value="",
-            props={"src": text_node.url, "alt": text_node.text},  # type: ignore
+            props={"src": text_node.url, "alt": text_node.text},
         )
 
 
 # ------------------------------mk doc to html nodes----------------------#
-def mk_block_child_unpacker(block):  # type: ignore
-    children = []
+def mk_block_child_unpacker(block: str) -> list[HTMLNode]:
+    children: list[HTMLNode] = []
     # textnodes = block_to_textnodes(block)
     # print(f"{textnodes}")
     # htmlnodes = textnodes_to_html(textnodes)
@@ -141,10 +148,10 @@ def mk_block_child_unpacker(block):  # type: ignore
     return children
 
 
-def block_to_textnodes(block):
-    textnodes = []
+def block_to_textnodes(block: str) -> list[TextNode]:
+    textnodes: list[TextNode] = []
     # split = block.splitlines(keepends=True)
-    split = block.split("\n\n")
+    split: list[str] = block.split("\n\n")
     for line in split:
         textnodes.extend(text_to_textnodes(line))
     return textnodes
@@ -153,10 +160,10 @@ def block_to_textnodes(block):
 def textnodes_to_html(textnodes: list[TextNode]) -> list[HTMLNode]:
     htmlnodes: list[HTMLNode] = []
     if isinstance(textnodes, TextNode) is True:
-        htmlnodes.append(text_node_to_html_node(textnodes))
+        htmlnodes.append(text_node_to_html_node(textnodes))  # type: ignore
     else:
         for textnode in textnodes:
-            htmlnodes.extend(textnodes_to_html(textnode))
+            htmlnodes.extend(textnodes_to_html(textnode))  # type: ignore
     return htmlnodes
 
 
@@ -185,16 +192,16 @@ def mk_doc_to_html_node(markdown_doc: str) -> HTMLNode:
     return ParentNode(tag="div", children=block_html_nodes)
 
 
-def heading_block_to_html_node(heading_block):
-    children = []
-    stripped = heading_block[heading_block[0:6].count("#") + 1 :]
+def heading_block_to_html_node(heading_block: str) -> HTMLNode:
+    children: list[HTMLNode] = []
+    stripped: str = heading_block[heading_block[0:6].count("#") + 1 :]
     children.extend(mk_block_child_unpacker(stripped))
     return ParentNode(tag=f"h{heading_block[0:6].count("#")}", children=children)
 
 
-def code_block_to_html_node(code_block):
-    children = []
-    stripped = code_block.strip("```")
+def code_block_to_html_node(code_block: str) -> HTMLNode:
+    children: list[HTMLNode] = []
+    stripped: str = code_block.strip("```")
     stripped2 = stripped.lstrip("\n\r\x1d\x1e\u2028\u2029")
     children.append(LeafNode("code", value=stripped2))
     if bool(children) is False:
@@ -202,16 +209,16 @@ def code_block_to_html_node(code_block):
     return ParentNode(tag="pre", children=children)
 
 
-def quote_block_to_html_node(quote_block):
-    children = []
-    stripped = quote_block.replace(">", "\n")
+def quote_block_to_html_node(quote_block: str) -> HTMLNode:
+    children: list[HTMLNode] = []
+    stripped: str = quote_block.replace(">", "\n")
     children.extend(mk_block_child_unpacker(stripped))
     return ParentNode(tag="blockquote", children=children)
 
 
-def unordered_list_to_html_node(unordered_list_block):
-    children = []
-    inline_children = []
+def unordered_list_to_html_node(unordered_list_block: str) -> HTMLNode:
+    children: list[HTMLNode] = []
+    inline_children: list[HTMLNode] = []
     for line in unordered_list_block.split("\n"):
         if (
             line[0] == "-" or line[0] == "*" or line[0] == "+" or line[0] == "-"
@@ -226,9 +233,9 @@ def unordered_list_to_html_node(unordered_list_block):
     return ParentNode(tag="ul", children=children)
 
 
-def ordered_list_block_to_html_node(ordered_list_block):
-    children = []
-    inline_children = []
+def ordered_list_block_to_html_node(ordered_list_block: str) -> HTMLNode:
+    children: list[HTMLNode] = []
+    inline_children: list[HTMLNode] = []
     for line in ordered_list_block.split("\n"):
         inline_children.extend(textnodes_to_html(text_to_textnodes(line[3:])))
         children.append(ParentNode("li", children=inline_children))
@@ -238,8 +245,8 @@ def ordered_list_block_to_html_node(ordered_list_block):
     return ParentNode(tag="ol", children=children)
 
 
-def paragraph_block_to_html_node(paragraph_block):
-    children = []
+def paragraph_block_to_html_node(paragraph_block: str) -> HTMLNode:
+    children: list[HTMLNode] = []
     children.extend(mk_block_child_unpacker(paragraph_block))
     return ParentNode("p", children=children)
 

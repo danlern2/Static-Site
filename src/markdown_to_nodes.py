@@ -110,8 +110,8 @@ import re
 #     return split_link
 
 
-def text_list_to_textnodes(text_list):
-    textnodes = []
+def text_list_to_textnodes(text_list: list[str]):
+    textnodes: list[TextNode] = []
     for item in text_list:
         textnodes.extend(text_to_textnodes(item))
     return textnodes
@@ -209,7 +209,7 @@ def textnodes_loop_with_delimiter(
     """
     Takes a list of TextNodes and a delimiter. Will send each node in the list and the given delimiter to the split_node_delimiter function and will extend that result to a new list of nodes.\n
     """
-    new_nodes = []
+    new_nodes: list[TextNode] = []
     for node in nodes:
         # ------unordered list exception-----#
         if delimiter == "*" and node.text[0:2] == "* ":
@@ -217,7 +217,7 @@ def textnodes_loop_with_delimiter(
             unordered_list_nodes = split_node_delimiter(
                 TextNode(unordered_list_text, TextType.TEXT), delimiter
             )
-            if unordered_list_nodes[0].text is not None:
+            if unordered_list_nodes[0].text is not None:  # type: ignore
                 unordered_list_nodes[0].text = "* " + unordered_list_nodes[0].text
                 new_nodes.extend(unordered_list_nodes)
             else:
@@ -278,7 +278,7 @@ def split_node_delimiter(node: TextNode, delimiter: str) -> List[TextNode]:
     return new_nodes
 
 
-def splitter(text: str, delimiter) -> List[TextNode]:
+def splitter(text: str, delimiter: str) -> List[TextNode]:
     """
     Take a text string that has a delimiter in it (already determined by the caller) and split off the ends, creating a 3 part list.\n
     ### Example:
@@ -297,38 +297,38 @@ def splitter(text: str, delimiter) -> List[TextNode]:
         #### TextNode(None, TextType.BOLD)
         ]
     """
-    new_nodes = []
+    new_nodes: list[TextNode] = []
     split_text: List[str] = []
     split_text.append(text.partition(delimiter)[1])
     split_text.append(text.partition(delimiter)[2].rpartition(delimiter)[0])
     split_text.append(text.partition(delimiter)[2].rpartition(delimiter)[1])
     if nest_checker(split_text[1]) is False:
-        new_nodes.append(TextNode(split_text[1], DELIMITER_TO_TYPE.get(delimiter)))
+        new_nodes.append(TextNode(split_text[1], DELIMITER_TO_TYPE.get(delimiter)))  # type: ignore
         return new_nodes
     else:
-        new_nodes.append(TextNode("", DELIMITER_TO_TYPE.get(delimiter)))
+        new_nodes.append(TextNode("", DELIMITER_TO_TYPE.get(delimiter)))  # type: ignore
         new_nodes.append(TextNode(split_text[1], TextType.TEXT))
-        new_nodes.append(TextNode("", DELIMITER_TO_TYPE.get(delimiter)))
+        new_nodes.append(TextNode("", DELIMITER_TO_TYPE.get(delimiter)))  # type: ignore
     return new_nodes
 
 
-def nest_checker(text):
+def nest_checker(text: str):
     for delim in DELIMITER_TO_TYPE:
         if delim in text:
             return True
     return False
 
 
-def extract_markdown_images(text) -> List[tuple]:
+def extract_markdown_images(text: str) -> list[tuple[str, str]]:
     return re.findall(r"!\[(.*?)\]\((.*?)\)", text)
 
 
-def extract_markdown_links(text) -> List[tuple]:
+def extract_markdown_links(text: str) -> list[tuple[str, str]]:
     return re.findall(r"\[(.*?)\]\((.*?)\)", text)
 
 
-def split_nodes_image(old_nodes: List[TextNode]) -> List[TextNode]:
-    new_nodes = []
+def split_nodes_image(old_nodes: List[TextNode]) -> list[TextNode]:
+    new_nodes: list[TextNode] = []
     image_pattern = re.compile(r"!\[(.*?)\]\((.*?)\)")
     for node in old_nodes:
         if image_pattern.search(node.text) is None:
@@ -349,7 +349,7 @@ def split_nodes_image(old_nodes: List[TextNode]) -> List[TextNode]:
 
 
 def split_nodes_link(old_nodes: List[TextNode]) -> List[TextNode]:
-    new_nodes = []
+    new_nodes: list[TextNode] = []
     link_pattern = re.compile(r"\[(.*?)\]\((.*?)\)")
     for node in old_nodes:
         if link_pattern.search(node.text) is None:
@@ -367,7 +367,7 @@ def split_nodes_link(old_nodes: List[TextNode]) -> List[TextNode]:
     return new_nodes
 
 
-def text_to_textnodes(text) -> List[TextNode]:
+def text_to_textnodes(text: str) -> List[TextNode]:
     node = TextNode(text, TextType.TEXT)
     delimited = delimiter_loop_on_textnodes([node])
     split_image = split_nodes_image(delimited)
