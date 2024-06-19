@@ -175,7 +175,7 @@ def code_block_to_html_node(code_block):
     stripped = code_block.strip("```")
     stripped2 = stripped.lstrip("\n\r\x1d\x1e\u2028\u2029")
     children.append(LeafNode("code", value=stripped2))
-    if bool(children) == False:
+    if bool(children) is False:
                 assert("inline children is empty")
     return ParentNode(tag="pre", children=children)
 
@@ -213,7 +213,14 @@ def paragraph_block_to_html_node(paragraph_block):
     children.extend(mk_block_child_unpacker(paragraph_block))
     return ParentNode("p", children=children)
 
-
+# markdown = (
+# """
+# 1. An elaborate pantheon of deities (the `Valar` and `Maiar`)
+# 2. The tragic saga of the Noldor Elves
+# 3. The rise and fall of great kingdoms such as Gondolin and Númenor
+# """)
+# print(mk_doc_to_html_node(markdown))
+# print(text_to_textnodes("An elaborate pantheon of deities (the `Valar` and `Maiar`)"))
 # def test(markdown):
 #     html_nodes = mk_doc_to_html_node(markdown)
 #     print(html_nodes)
