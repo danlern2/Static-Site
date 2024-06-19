@@ -3,4 +3,4 @@ src/markdown_test
 TESTDIRECTORY/
 public/
 src/split_delim_share.py
-src/split_node_delimiter_test.py
+src/split_delim_test.py

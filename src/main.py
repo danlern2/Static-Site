@@ -1,18 +1,25 @@
-from textnode import *
-from htmlnode import *
-from markdown_to_nodes import *
+import pathlib
 import os
 import shutil
-from pathlib import Path
-from copystatic import *
-from page_generator import *
+from copystatic import directory_copier
+from page_generator import generate_pages_recursive
 
 
 def main():
-    content = pathlib.Path(os.path.abspath(os.path.expanduser(os.path.expandvars("./static_site/content"))))
-    static = pathlib.Path(os.path.abspath(os.path.expanduser(os.path.expandvars("./static_site/static"))))
-    template = pathlib.Path(os.path.abspath(os.path.expanduser(os.path.expandvars("./static_site/template.html"))))
-    dest_path = pathlib.Path(os.path.abspath(os.path.expanduser(os.path.expandvars("./static_site/public"))))
+    content = pathlib.Path(
+        os.path.abspath(os.path.expanduser(os.path.expandvars("./static_site/content")))
+    )
+    static = pathlib.Path(
+        os.path.abspath(os.path.expanduser(os.path.expandvars("./static_site/static")))
+    )
+    template = pathlib.Path(
+        os.path.abspath(
+            os.path.expanduser(os.path.expandvars("./static_site/template.html"))
+        )
+    )
+    dest_path = pathlib.Path(
+        os.path.abspath(os.path.expanduser(os.path.expandvars("./static_site/public")))
+    )
     print(f"Setting up directory at {dest_path}")
     if os.path.exists(dest_path):
         print("Removing old files")
@@ -20,5 +27,6 @@ def main():
         print("Creating files:")
     directory_copier(static, dest_path)
     generate_pages_recursive(content, template, dest_path)
-    
+
+
 main()
