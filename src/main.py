@@ -25,8 +25,8 @@ def main():
         print("Removing old files")
         shutil.rmtree(dest_path)
         print("Creating files:")
-    directory_copier(static, dest_path)
-    generate_pages_recursive(content, template, dest_path)
+    directory_copier(static, dest_path)  # type: ignore
+    generate_pages_recursive(content, template, dest_path)  # type: ignore
 
 
 main()
