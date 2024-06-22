@@ -20,16 +20,16 @@ class HTMLNode:
         self,
         tag: str | None = None,
         text: str | None = None,
-        children: list[HTMLNode] | None = None,
-        props: dict[str | None, str | None] | None = None,
+        # children: list[HTMLNode] | None = None,
+        props: dict[str, str] | None = None,
     ):
         self.tag = tag
         self.text = text
-        self.children: list[HTMLNode] | None = children
+        # self.children: list[HTMLNode] | None = children
         self.props = props
 
     def __repr__(self):
-        return f"HTMLNode({self.tag}, '{self.text}', {self.children}, {self.props})"
+        return f"HTMLNode({self.tag}, '{self.text}', {self.props})"
 
     def print_details(self):
         print(f"Tags: {self.tag}")
@@ -39,7 +39,7 @@ class HTMLNode:
             print(f"Value: {self.text[0:10]}")
         else:
             print(f"Value: {self.text[0:10]} ...{self.text[-20:len(self.text)]}")
-        print(f"Children: {self.children}")
+        # print(f"Children: {self.children}")
         print(f"Props: {self.props}")
 
     def to_html(self) -> str | None:
@@ -56,7 +56,7 @@ class HTMLNode:
 
 class LeafNode(HTMLNode):
     def __init__(self, text: str):
-        super().__init__(None, text, None, None)
+        super().__init__(None, text, None)
 
     def __repr__(self):
         return f"HTMLNode('{self.text}')"
@@ -73,10 +73,10 @@ class ParentNode(HTMLNode):
         tag: str,
         # text: str | None,
         children: list[HTMLNode],
-        props: dict[str | None, str | None] | None = None,
+        props: dict[str, str] | None = None,
     ):
-        super().__init__(tag, None, children, props)
-        # if children:
+        super().__init__(tag, None, props)
+        self.children: list[HTMLNode] = children
         for child in children:
             assert isinstance(child, HTMLNode)
 
@@ -86,7 +86,7 @@ class ParentNode(HTMLNode):
     def to_html(self) -> str:
         if self.tag is None:
             raise ValueError("Missing tag argument.")
-        elif self.children is None or bool(self.children) is False:
+        elif bool(self.children) is False:
             raise ValueError("Missing children argument.")
         html_string: str = ""
         html_string += f"<{self.tag}{self.props_to_html()}>"
@@ -96,32 +96,6 @@ class ParentNode(HTMLNode):
         return html_string  # type: ignore
 
 
-class GrandparentNode(HTMLNode):
-    def __init__(
-        self,
-        tag: str,
-        children: list[HTMLNode],
-        props: dict[str | None, str | None] | None = None,
-    ):
-        super().__init__(tag, None, children, props)
-        # if children:
-        for child in children:
-            assert isinstance(child, HTMLNode)
-
-    def __repr__(self):
-        return f"HTMLNode({self.tag}, {self.children})"
-
-    def to_html(self) -> str:
-        if self.tag is None:
-            raise ValueError("Missing tag argument.")
-        elif self.children is None or bool(self.children) is False:
-            raise ValueError("Missing children argument.")
-        html_string: str = ""
-        html_string += f"<{self.tag}{self.props_to_html()}>"
-        for child in self.children:
-            html_string += child.to_html()  # type: ignore
-        html_string += f"</{self.tag}>"  # type: ignore
-        return html_string  # type: ignore
-
+GrandparentNode = ParentNode
 
 ## ============ HTMLNode Class =============##

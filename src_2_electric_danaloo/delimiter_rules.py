@@ -7,7 +7,6 @@ from htmlnode_class import (
 )
 from markdown_direct_to_html import (
     DELIMITER_TO_TYPE,
-    DelimiterType,
     # DELIM_TO_RULE,
 )
 
@@ -41,7 +40,7 @@ def base_rule(text: str) -> tuple[list[HTMLNode], str]:
                 # Reset plain text so it returns blank.
                 plain_text = ""
                 # Make a new parentnode with the tag type of the delimiter
-                delim_parent = ParentNode(DELIMITER_TO_TYPE.get(delim), children=[])
+                delim_parent = ParentNode(DELIMITER_TO_TYPE[delim], children=[])
                 # Call the delimiter specific rule on all the remaining text except the delimiter itself
                 rule_result = DELIM_TO_RULE[delim](text[i + len(delim) :])
                 # Add whatever nested children were made in the rule to the delimiter parent's children list
@@ -81,7 +80,7 @@ def italic_rule(text: str) -> tuple[list[HTMLNode], str]:
                 # Reset plain text so it returns blank.
                 plain_text = ""
                 # Make a new parentnode with the tag type of the delimiter
-                delim_parent = ParentNode(DELIMITER_TO_TYPE.get(delim), children=[])
+                delim_parent = ParentNode(DELIMITER_TO_TYPE[delim], children=[])
                 # Call the delimiter specific rule on all the remaining text except the delimiter itself
                 rule_result = DELIM_TO_RULE[delim](text[i + len(delim) :])
                 # Add whatever nested children were made in the rule to the delimiter parent's children list
@@ -119,7 +118,7 @@ def bold_rule(text: str) -> tuple[list[HTMLNode], str]:
                 # Reset plain text so it returns blank.
                 plain_text = ""
                 # Make a new parentnode with the tag type of the delimiter
-                delim_parent = ParentNode(DELIMITER_TO_TYPE.get(delim), children=[])
+                delim_parent = ParentNode(DELIMITER_TO_TYPE[delim], children=[])
                 # Call the delimiter specific rule on all the remaining text except the delimiter itself
                 rule_result = DELIM_TO_RULE[delim](text[i + len(delim) :])
                 # Add whatever nested children were made in the rule to the delimiter parent's children list
