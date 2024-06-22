@@ -9,10 +9,10 @@ def generate_page(from_path: str, template_path: str, dest_path: str):
         full_doc = file.read()
     with open(template_path) as file:
         template = file.read()
-    html_doc: list = mk_doc_to_html_node(full_doc).to_html()
+    html_doc: str | None = mk_doc_to_html_node(full_doc).to_html()
     title = extract_title(full_doc)
     step1 = template.replace("{{ Title }}", title)
-    final = step1.replace("{{ Content }}", html_doc)
+    final = step1.replace("{{ Content }}", html_doc)  # type: ignore
     if os.path.exists(os.path.dirname(dest_path)) is False:
         os.makedirs(os.path.dirname(dest_path))
     with open(dest_path, "w") as file:
