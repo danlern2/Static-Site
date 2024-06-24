@@ -1,5 +1,5 @@
 from __future__ import annotations
-# from delimiter_rules import bold_rule, italic_rule, link_rule, image_rule, strike_rule
+from delimiter_rules import delimiter_nester_in_node
 
 from htmlnode_class import HTMLNode, LeafNode, ParentNode, GrandparentNode
 from enum import Enum
@@ -19,7 +19,7 @@ import re
 # }
 
 
-class DelimiterType(Enum):
+class TagType(Enum):
     # TEXT: None = None
     CODE: str = "code"
     BOLD: str = "b"
@@ -27,37 +27,51 @@ class DelimiterType(Enum):
     ITALIC: str = "i"
     LINK: str = "a"
     IMAGE: str = "img"
+    LIST: str = "li"
+    OLIST: str = "ol"
+    UNOLIST: str = "ul"
+    CODEBLOCK: str = "pre"
+    QUOTE: str = "blockquote"
+    HEADING: str = "h"
+    PARAGRAPH: str = "p"
+    DOC: str = "div"
 
 
-# text = "You can find the [wiki here](https://lotr.fandom.com/wiki/Main_Page)."
-# print(str(DelimiterType.LINK) in text)
-
-
-class TextType(Enum):
-    TEXT: str = "text"
-    CODE: str = "code"
-    BOLD: str = "bold"
-    STRIKE: str = "strike"
-    ITALIC: str = "italic"
-    LINK: str = "link"
-    IMAGE: str = "image"
-
+class MKBlockType(Enum):
+    Paragraph = "paragraph"
+    Heading = "heading"
+    Code = "code"
+    Quote = "quote"
+    UnorderedList = "unordered_list"
+    OrderedList = "ordered_list"
+    Document = "div"
 
 DELIMITER_TO_TYPE = {
-    "`": DelimiterType.CODE,
-    "**": DelimiterType.BOLD,
-    # '__': DelimiterType.BOLD,
-    "~~": DelimiterType.STRIKE,
-    "*": DelimiterType.ITALIC,
-    # '_': DelimiterType.ITALIC,
-    "[": DelimiterType.LINK,
-    "!": DelimiterType.IMAGE,
+    "`": TagType.CODE,
+    "**": TagType.BOLD,
+    # '__': TagType.BOLD,
+    "~~": TagType.STRIKE,
+    "*": TagType.ITALIC,
+    # '_': TagType.ITALIC,
+    "!": TagType.IMAGE,
+    "[": TagType.LINK,
 }
-REGEX_TO_TYPE = {
-    re.compile(r"(\*\*\b)|(\b\*\*)"): TextType.BOLD,
-    re.compile(r"(__\b)|(\b__)"): TextType.BOLD,
-    re.compile(r"(\*\b)|(\b\*)"): TextType.ITALIC,
-    re.compile(r"(_\b)|(\b_)"): TextType.ITALIC,
+TAG_TYPE_TO_TAG = {
+    "p": TagType.PARAGRAPH,
+    "h": TagType.HEADING,
+    "pre": TagType.CODEBLOCK,
+    "blockquote": TagType.QUOTE,
+    "ul": TagType.UNOLIST,
+    "ol": TagType.OLIST,
+    "div": TagType.DOC,
+    "`": TagType.CODE,
+    "**": TagType.BOLD,
+    # '__': TagType.BOLD,
+    "~~": TagType.STRIKE,
+    "*": TagType.ITALIC,
+    # '_': TagType.ITALIC,
+    "!": TagType.IMAGE,
+    "[": TagType.LINK,
 }
 
 ## ============ HTMLNode Class =============##
@@ -180,30 +194,30 @@ def blep():
 #     return nodes
 
 
-def delimiter_checker_loop(text: str):
-    for i in range(len(text)):
-        for delim in DELIMITER_TO_TYPE:
-            if text[i:].startswith(delim):
-                return delim
-    return
-    # x: int = 0
-    # i: float = float("inf")
-    # delimiters_found: dict[int, str] = {}
-    # try:
-    #     for delim in DELIMITER_TO_TYPE:
-    #         x = text.find(delim)
-    #         if x == i:
-    #             return delimiters_found[i]
-    #         if x != -1:
-    #             if x < i:
-    #                 i = x
-    #                 delimiters_found[x] = delim
-    #                 if x == 0:
-    #                     print("hi")
-    #                     break
-    #     return delimiters_found[i]
-    # except Exception as e:
-    #     pass
+# def delimiter_checker_loop(text: str):
+#     for i in range(len(text)):
+#         for delim in DELIMITER_TO_TYPE:
+#             if text[i:].startswith(delim):
+#                 return delim
+#     return
+#     # x: int = 0
+#     # i: float = float("inf")
+#     # delimiters_found: dict[int, str] = {}
+#     # try:
+#     #     for delim in DELIMITER_TO_TYPE:
+#     #         x = text.find(delim)
+#     #         if x == i:
+#     #             return delimiters_found[i]
+#     #         if x != -1:
+#     #             if x < i:
+#     #                 i = x
+#     #                 delimiters_found[x] = delim
+#     #                 if x == 0:
+#     #                     print("hi")
+#     #                     break
+#     #     return delimiters_found[i]
+#     # except Exception as e:
+#     #     pass
 
 
 # print(delimiter_checker_loop("string"))
@@ -392,19 +406,19 @@ def nest_checker(text: str):
 
 
 # def text_node_to_html_node(text_node: HTMLNode) -> HTMLNode | None:
-#     if text_node.text_type not in DelimiterType:
+#     if text_node.text_type not in TagType:
 #         raise Exception(f"Invalid text type: {text_node.text_type}")
-#     DelimiterType.TEXT:
+#     TagType.TEXT:
 #         return ParentNode(tag=None, text=text_node.text)  # type: ignore
-#     DelimiterType.BOLD:
+#     TagType.BOLD:
 #         return ParentNode(tag="b", text=text_node.text)
-#     DelimiterType.ITALIC:
+#     TagType.ITALIC:
 #         return ParentNode(tag="i", text=text_node.text)
-#     DelimiterType.CODE:
+#     TagType.CODE:
 #         return ParentNode(tag="code", text=text_node.text)
-#     DelimiterType.LINK:
+#     TagType.LINK:
 #         return ParentNode(tag="a", text=text_node.text, props={"href": text_node.url})
-#     DelimiterType.IMAGE:
+#     TagType.IMAGE:
 #         return ParentNode(
 #             tag="img",
 #             text="",
@@ -414,177 +428,151 @@ def nest_checker(text: str):
 
 # -------------------------------mk doc to html nodes----------------------#
 # --------------Markdown blocks-------------#
-class MKBlockType(Enum):
-    Paragraph = "paragraph"
-    Heading = "heading"
-    Code = "code"
-    Quote = "quote"
-    UnorderedList = "unordered_list"
-    OrderedList = "ordered_list"
 
 
-def markdown_to_blocks(markdown: str) -> list[str]:
-    blocks = markdown.split("\n\n")
-    block_list: list[str] = []
-    for block in blocks:
-        if block == "":
-            continue
-        block_list.append(block.strip())
-    return block_list
+# def markdown_to_blocks(markdown: str) -> list[str]:
+#     blocks = markdown.split("\n\n")
+#     block_list: list[str] = []
+#     for block in blocks:
+#         if block == "":
+#             continue
+#         block_list.append(block.strip())
+#     return block_list
 
 
-def block_to_block_type(markdown_block: str) -> MKBlockType:
-    if (
-        markdown_block.startswith("# ")
-        or markdown_block.startswith("## ")
-        or markdown_block.startswith("### ")
-        or markdown_block.startswith("#### ")
-        or markdown_block.startswith("##### ")
-        or markdown_block.startswith("###### ")
-    ):
-        return MKBlockType.Heading
-    elif (
-        markdown_block[0:3] == "```"
-        and markdown_block[-3 : len(markdown_block)] == "```"
-    ):
-        return MKBlockType.Code
-    elif (
-        markdown_block[0] == ">"
-        and len(set([item[0] for item in markdown_block.split("\n")])) == 1
-    ):
-        return MKBlockType.Quote
-    elif (
-        markdown_block[0] == "-"
-        or markdown_block[0] == "*"
-        or markdown_block[0] == "+"
-        or markdown_block[0] == "-"
-    ) and set([item[0:2] for item in markdown_block.split("\n")]) <= set(
-        ["- ", "* ", "+ ", "- "]
-    ):
-        return MKBlockType.UnorderedList
-    elif markdown_block.startswith("1. "):
-        i = 1
-        for line in markdown_block.split("\n"):
-            if not line.startswith(f"{i}. "):
-                return MKBlockType.Paragraph
-            i += 1
-        return MKBlockType.OrderedList
-    return MKBlockType.Paragraph
+# def block_to_block_type(markdown_block: str):
+#     if (
+#         markdown_block.startswith("# ")
+#         or markdown_block.startswith("## ")
+#         or markdown_block.startswith("### ")
+#         or markdown_block.startswith("#### ")
+#         or markdown_block.startswith("##### ")
+#         or markdown_block.startswith("###### ")
+#     ):
+#         return TagType.HEADING
+#     elif (
+#         markdown_block[0:3] == "```"
+#         and markdown_block[-3 : len(markdown_block)] == "```"
+#     ):
+#         return TagType.CODEBLOCK
+#     elif (
+#         markdown_block[0] == ">"
+#         and len(set([item[0] for item in markdown_block.split("\n")])) == 1
+#     ):
+#         return TagType.QUOTE
+#     elif (
+#         markdown_block[0] == "-"
+#         or markdown_block[0] == "*"
+#         or markdown_block[0] == "+"
+#         or markdown_block[0] == "-"
+#     ) and set([item[0:2] for item in markdown_block.split("\n")]) <= set(
+#         ["- ", "* ", "+ ", "- "]
+#     ):
+#         return TagType.UNOLIST
+#     elif markdown_block.startswith("1. "):
+#         i = 1
+#         for line in markdown_block.split("\n"):
+#             if not line.startswith(f"{i}. "):
+#                 return TagType.PARAGRAPH
+#             i += 1
+#         return TagType.OLIST
+#     return TagType.PARAGRAPH
 
 
-def mk_block_child_unpacker(block: str) -> list[HTMLNode]:
-    children: list[HTMLNode] = []
-    #
-    #
-    return children
+# # def mk_block_child_unpacker(block: str) -> list[HTMLNode]:
+# #     children: list[HTMLNode] = []
+# #     #
+# #     #
+# #     return children
 
 
-def block_to_htmlnodes(block: str) -> list[HTMLNode]:
-    htmlnodes: list[HTMLNode] = []
-    # split = block.splitlines(keepends=True)
-    split: list[str] = block.split("\n\n")
-    for line in split:
-        htmlnodes.extend(text_to_htmlnode(line))
-    return htmlnodes
+# # def block_to_htmlnodes(block: str) -> list[HTMLNode]:
+# #     htmlnodes: list[HTMLNode] = []
+# #     # split = block.splitlines(keepends=True)
+# #     split: list[str] = block.split("\n\n")
+# #     for line in split:
+# #         htmlnodes.extend(text_to_htmlnode(line))
+# #     return htmlnodes
 
 
-def text_to_htmlnode(text: str) -> list[HTMLNode]:
-    html_nodes: list[HTMLNode] = []
-    html_nodes.extend(delimiter_loop_on_textnodes(text))
-    return html_nodes
+# def mk_doc_to_html_node(markdown_doc: str) -> HTMLNode:
+#     markdown_blocks = markdown_to_blocks(markdown_doc)
+#     block_dict: dict[str, str] = {}
+#     for block in markdown_blocks:
+#         block_dict[block] = block_to_block_type(block)
+#     block_html_nodes: list[HTMLNode] = []
+#     block_tuples: zip[tuple[str, str]] = zip(
+#         block_dict.keys(), block_dict.values()
+#     )
+#     for block, type in block_tuples:
+#         if type == TagType.HEADING:
+#             block_html_nodes.append(heading_block_to_html_node(block))
+#         if type == TagType.CODEBLOCK:
+#             block_html_nodes.append(code_block_to_html_node(block))
+#         if type == TagType.QUOTE:
+#             block_html_nodes.append(quote_block_to_html_node(block))
+#         if type == TagType.UNOLIST:
+#             block_html_nodes.append(unordered_list_to_html_node(block))
+#         if type == TagType.OLIST:
+#             block_html_nodes.append(ordered_list_block_to_html_node(block))
+#         if type == TagType.PARAGRAPH:
+#             block_html_nodes.append(paragraph_block_to_html_node(block))
+#     return GrandparentNode(tag=TagType.DOC, children=block_html_nodes)
 
+# # //? Maybe done
+# def heading_block_to_html_node(heading_block: str) -> HTMLNode:
+#     stripped: str = heading_block[heading_block[0:6].count("#") + 1 :]
+#     new_node = GrandparentNode(tag=f"h{heading_block[0:6].count("#")}", children=[])
+#     delimiter_nester_in_node(new_node, stripped)
 
-# def parent_to_leaf(nodes: list[HTMLNode]) -> list[HTMLNode]:
-#     for node in nodes:
-#         if node.children is None or node.children is []:
+#     return new_node
 
+# # //? Maybe done
+# def code_block_to_html_node(code_block: str) -> HTMLNode:
+#     children: list[HTMLNode] = []
+#     stripped: str = code_block.strip("```")
+#     stripped2 = stripped.lstrip("\n\r\x1d\x1e\u2028\u2029")
+#     children.append(LeafNode(text=stripped2))
+#     if bool(children) is False:
+#         assert "inline children is empty"
+#     return GrandparentNode(TagType.CODEBLOCK, children=children)
 
-def mk_doc_to_html_node(markdown_doc: str) -> HTMLNode:
-    markdown_blocks = markdown_to_blocks(markdown_doc)
-    block_dict: dict[str, MKBlockType] = {}
-    for block in markdown_blocks:
-        block_dict[block] = block_to_block_type(block)
-    block_html_nodes: list[HTMLNode] = []
-    block_tuples: zip[tuple[str, MKBlockType]] = zip(
-        block_dict.keys(), block_dict.values()
-    )
-    for block, type in block_tuples:
-        if type == MKBlockType.Heading:
-            block_html_nodes.append(heading_block_to_html_node(block))
-        if type == MKBlockType.Code:
-            block_html_nodes.append(code_block_to_html_node(block))
-        if type == MKBlockType.Quote:
-            block_html_nodes.append(quote_block_to_html_node(block))
-        if type == MKBlockType.UnorderedList:
-            block_html_nodes.append(unordered_list_to_html_node(block))
-        if type == MKBlockType.OrderedList:
-            block_html_nodes.append(ordered_list_block_to_html_node(block))
-        if type == MKBlockType.Paragraph:
-            block_html_nodes.append(paragraph_block_to_html_node(block))
-    return GrandparentNode(tag="div", children=block_html_nodes)
+# # //? Maybe done
+# def quote_block_to_html_node(quote_block: str) -> HTMLNode:
+#     children: list[HTMLNode] = []
+#     stripped: str = quote_block.replace(">", "\n")
+#     children.append(LeafNode(stripped))
+#     return GrandparentNode(tag=TagType.QUOTE, children=children)
 
+# # //? Maybe done
+# def unordered_list_to_html_node(unordered_list_block: str) -> HTMLNode:
+#     inline_children: list[HTMLNode] = []
+#     for line in unordered_list_block.split("\n"):
+#         if (
+#             line[0] == "-" or line[0] == "*" or line[0] == "+" or line[0] == "-"
+#         ) and set([item[0:2] for item in unordered_list_block.split("\n")]) <= set(
+#             ["- ", "* ", "+ ", "- "]
+#         ):
+#             new_node = ParentNode(TagType.LIST, children=[])
+#             inline_children.append(delimiter_nester_in_node(new_node, line[2:]))
+#             if bool(inline_children) is False:
+#                 assert "inline children is empty"
+#     return GrandparentNode(tag=TagType.UNOLIST, children=inline_children)
 
-def heading_block_to_html_node(heading_block: str) -> HTMLNode:
-    children: list[HTMLNode] = []
-    stripped: str = heading_block[heading_block[0:6].count("#") + 1 :]
-    children.extend(mk_block_child_unpacker(stripped))
-    return ParentNode(tag=f"h{heading_block[0:6].count("#")}", children=children)
+# # //? Maybe done
+# def ordered_list_block_to_html_node(ordered_list_block: str) -> HTMLNode:
+#     inline_children: list[HTMLNode] = []
+#     for line in ordered_list_block.split("\n"):
+#         new_node = ParentNode(TagType.LIST, children=[])
+#         inline_children.append(delimiter_nester_in_node(new_node, line[2:]))
+#         if bool(inline_children) is False:
+#             assert "inline children is empty"
+#     return ParentNode(tag=TagType.OLIST, children=inline_children)
 
+# # //? Maybe done
+# def paragraph_block_to_html_node(paragraph_block: str) -> HTMLNode:
+#     children: list[HTMLNode] = []
+#     new_node = ParentNode("p", children=children)
+#     delimiter_nester_in_node(new_node, paragraph_block)
+#     return new_node
 
-def code_block_to_html_node(code_block: str) -> HTMLNode:
-    children: list[HTMLNode] = []
-    stripped: str = code_block.strip("```")
-    stripped2 = stripped.lstrip("\n\r\x1d\x1e\u2028\u2029")
-    children.append(LeafNode(text=stripped2))
-    if bool(children) is False:
-        assert "inline children is empty"
-    return GrandparentNode(tag="pre", children=children)
-
-
-def quote_block_to_html_node(quote_block: str) -> HTMLNode:
-    children: list[HTMLNode] = []
-    stripped: str = quote_block.replace(">", "\n")
-    return ParentNode(tag="blockquote", text=stripped, children=children)
-
-
-def unordered_list_to_html_node(unordered_list_block: str) -> HTMLNode:
-    children: list[HTMLNode] = []
-    inline_children: list[HTMLNode] = []
-    for line in unordered_list_block.split("\n"):
-        if (
-            line[0] == "-" or line[0] == "*" or line[0] == "+" or line[0] == "-"
-        ) and set([item[0:2] for item in unordered_list_block.split("\n")]) <= set(
-            ["- ", "* ", "+ ", "- "]
-        ):
-            inline_children.extend(textnodes_to_html(text_to_textnodes(line[2:])))
-            children.append(ParentNode("li", children=inline_children))
-            if bool(inline_children) is False:
-                assert "inline children is empty"
-            inline_children = []
-    return GrandparentNode(tag="ul", children=children)
-
-
-def ordered_list_block_to_html_node(ordered_list_block: str) -> HTMLNode:
-    children: list[HTMLNode] = []
-    inline_children: list[HTMLNode] = []
-    for line in ordered_list_block.split("\n"):
-        inline_children.extend(textnodes_to_html(text_to_textnodes(line[3:])))
-        children.append(ParentNode("li", children=inline_children))
-        if bool(inline_children) is False:
-            assert "inline children is empty"
-        inline_children = []
-    return ParentNode(tag="ol", children=children)
-
-
-def paragraph_block_to_html_node(paragraph_block: str) -> HTMLNode:
-    children: list[HTMLNode] = []
-    children.extend(mk_block_child_unpacker(paragraph_block))
-    return ParentNode("p", children=children)
-
-
-def extract_markdown_images(text: str) -> list[tuple[str, str]]:
-    return re.findall(r"!\[(.*?)\]\((.*?)\)", text)
-
-
-def extract_markdown_links(text: str) -> list[tuple[str, str]]:
-    return re.findall(r"\[(.*?)\]\((.*?)\)", text)

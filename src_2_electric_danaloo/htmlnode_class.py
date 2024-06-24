@@ -1,24 +1,22 @@
 from __future__ import annotations
-# from delimiter_rules import bold_rule, italic_rule, link_rule, image_rule, strike_rule
+from imports import TagType
 
+# def cia(tag: str | TagType): # * Circular Import Avoider
+#     # from block_to_html import TAG_TYPE_TO_TAG, TagType
+#     if tag in TagType:
+#         html_tag: str = tag.value
+#         return html_tag
+    # if tag in TAG_TYPE_TO_TAG:
+    #     html_tag: str= TAG_TYPE_TO_TAG[tag].value
+    #     return html_tag
 
-# DELIM_TO_RULE: dict[str,] = {
-#     "**": bold_rule,
-#     "__": bold_rule,
-#     "~~": strike_rule,
-#     "*": italic_rule,
-#     "_": italic_rule,
-#     "[": link_rule,
-#     "!": image_rule,
-# }
 
 ## ============ HTMLNode Class =============##
-
 
 class HTMLNode:
     def __init__(
         self,
-        tag: str | None = None,
+        tag: str | TagType,
         text: str | None = None,
         # children: list[HTMLNode] | None = None,
         props: dict[str, str] | None = None,
@@ -56,21 +54,22 @@ class HTMLNode:
 
 class LeafNode(HTMLNode):
     def __init__(self, text: str):
-        super().__init__(None, text, None)
+        self.text = text
+        # super().__init__(None, text)
 
     def __repr__(self):
         return f"HTMLNode('{self.text}')"
 
-    def to_html(self) -> str | None:
-        if self.text is None:
+    def to_html(self) -> str:
+        if self.text is None: # type: ignore
             raise ValueError
-        return self.text
+        return f"{self.text}"
 
 
 class ParentNode(HTMLNode):
     def __init__(
         self,
-        tag: str,
+        tag: str|TagType,
         # text: str | None,
         children: list[HTMLNode],
         props: dict[str, str] | None = None,
@@ -88,14 +87,14 @@ class ParentNode(HTMLNode):
             raise ValueError("Missing tag argument.")
         elif bool(self.children) is False:
             raise ValueError("Missing children argument.")
+        if isinstance(self.tag, TagType):
+            self.tag = self.tag.value
         html_string: str = ""
-        html_string += f"<{self.tag}{self.props_to_html()}>"
+        html_string += f"<{self.tag}{self.props_to_html()}>" # type: ignore
         for child in self.children:
-            html_string += child.to_html()  # type: ignore
-        html_string += f"</{self.tag}>"  # type: ignore
+            html_string += child.to_html()   # type: ignore
+        html_string += f"</{self.tag}>\n"  # type: ignore
         return html_string  # type: ignore
 
-
-GrandparentNode = ParentNode
 
 ## ============ HTMLNode Class =============##

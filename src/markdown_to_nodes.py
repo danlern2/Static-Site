@@ -1,3 +1,4 @@
+from __future__ import annotations
 from textnode import TextNode, TextType, DELIMITER_TO_TYPE
 from typing import List
 from enum import Enum
@@ -118,7 +119,11 @@ def text_list_to_textnodes(text_list: list[str]):
     return textnodes
 
 
-# print(text_to_textnodes("This is **text** with an *italic* word and a `code block` and an ![image](https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/zjjcJKZ.png) and a [link](https://boot.dev)"))
+# print(
+#     text_to_textnodes(
+#         "This is **text** with an *italic* word and a `code block` and an ![image](https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/zjjcJKZ.png) and a [link](https://boot.dev)"
+#     )
+# )
 
 
 # --------------Markdown blocks-------------#
