@@ -143,7 +143,7 @@ def test() -> None:
         print(realHtml)
     return 
 
-test()
+# test()
 
 
 # node = ParentNode(TagType.DOC, children=[])

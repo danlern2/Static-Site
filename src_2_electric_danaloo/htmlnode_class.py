@@ -1,5 +1,5 @@
 from __future__ import annotations
-from imports import TagType
+from imports import (TagType, BLOCK_TAGS)
 
 # def cia(tag: str | TagType): # * Circular Import Avoider
 #     # from block_to_html import TAG_TYPE_TO_TAG, TagType
@@ -70,7 +70,6 @@ class ParentNode(HTMLNode):
     def __init__(
         self,
         tag: str|TagType,
-        # text: str | None,
         children: list[HTMLNode],
         props: dict[str, str] | None = None,
     ):
@@ -90,10 +89,14 @@ class ParentNode(HTMLNode):
         if isinstance(self.tag, TagType):
             self.tag = self.tag.value
         html_string: str = ""
-        html_string += f"<{self.tag}{self.props_to_html()}>" # type: ignore
+        html_string += f"<{self.tag}{self.props_to_html()}>"
+        if self.tag in BLOCK_TAGS:
+            html_string += "\n"
         for child in self.children:
-            html_string += child.to_html()   # type: ignore
-        html_string += f"</{self.tag}>\n"  # type: ignore
+            html_string += child.to_html() # type: ignore
+        html_string += f"</{self.tag}>"  # type: ignore
+        if self.tag in BLOCK_TAGS:
+            html_string += "\n" # type: ignore
         return html_string  # type: ignore
 
 

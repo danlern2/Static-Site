@@ -1,7 +1,7 @@
 from __future__ import annotations
 from delimiter_rules import delimiter_nester_in_node
 
-from htmlnode_class import HTMLNode, LeafNode, ParentNode, GrandparentNode
+from htmlnode_class import HTMLNode, LeafNode, ParentNode
 from enum import Enum
 import re
 

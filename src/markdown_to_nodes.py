@@ -104,7 +104,7 @@ import re
 #     return new_nodes
 
 
-def text_to_textnodes(text) -> List[TextNode]:
+def text_to_textnodes(text: str) -> List[TextNode]:
     node = TextNode(text, TextType.TEXT)
     delimited = delimiter_loop_on_textnodes([node])
     split_image = split_nodes_image(delimited)
@@ -251,10 +251,10 @@ def split_node_delimiter(node: TextNode, delimiter: str) -> List[TextNode]:
         new_nodes.append(node)
     elif delimiter in text:
         # ---------------Italic Exception--------------#
-        if (delimiter == "*" or delimiter == "_") and delimiter in text:
-            italicE = italic_exception(node, delimiter)
-            new_nodes.extend(italicE[0])
-            return textnodes_loop_with_delimiter(new_nodes, italicE[1])
+        # if (delimiter == "*" or delimiter == "_") and delimiter in text:
+        #     italicE = italic_exception(node, delimiter)
+        #     new_nodes.extend(italicE[0])
+        #     return textnodes_loop_with_delimiter(new_nodes, italicE[1])
         # ---------------Italic Exception--------------#
 
         # Set i to the first instance index of the delimiter
@@ -291,31 +291,31 @@ def split_node_delimiter(node: TextNode, delimiter: str) -> List[TextNode]:
     return new_nodes
 
 
-def italic_exception(node: TextNode, delimiter: str) -> tuple[list[TextNode], str]:
-    i = 0
-    x = 0
-    new_nodes: list[TextNode] = []
-    text: str = node.text
+# def italic_exception(node: TextNode, delimiter: str) -> tuple[list[TextNode], str]:
+#     i = 0
+#     x = 0
+#     new_nodes: list[TextNode] = []
+#     text: str = node.text
 
-    # Set i to the first instance index of the delimiter
-    i = text.index(delimiter)
-    # If there is no match for the delimiter in the rest of the text then its not a true case of that delimiter
-    # and append it as is
-    if delimiter not in text[i + 1 :]:
-        raise Exception("Not valid markdown")
+#     # Set i to the first instance index of the delimiter
+#     i = text.index(delimiter)
+#     # If there is no match for the delimiter in the rest of the text then its not a true case of that delimiter
+#     # and append it as is
+#     if delimiter not in text[i + 1 :]:
+#         raise Exception("Not valid markdown")
 
-    # Set x to the value of the next index where you find the delimiter
-    x = text[i + 1 :].index(delimiter) + len(text[: i + 1])
-    x += 1
-    # Check if x is not the index of a pair of the delimiter (bold), and if it is, increment x to get outside.
-    if x != len(text) and text[x] == delimiter[0]:
-        x += 1
-    # Check the text again for the delimiter
-    if delimiter not in text[x + len(delimiter) :]:
-        new_nodes.append(node)
-    # If there is another delimiter in the text,
+#     # Set x to the value of the next index where you find the delimiter
+#     x = text[i + 1 :].index(delimiter) + len(text[: i + 1])
+#     x += 1
+#     # Check if x is not the index of a pair of the delimiter (bold), and if it is, increment x to get outside.
+#     if x != len(text) and text[x] == delimiter[0]:
+#         x += 1
+#     # Check the text again for the delimiter
+#     if delimiter not in text[x + len(delimiter) :]:
+#         new_nodes.append(node)
+#     # If there is another delimiter in the text,
 
-    return new_nodes, delimiter
+#     return new_nodes, delimiter
 
 
 # print(italic_exception(TextNode("just *a **little test*** string", TextType.TEXT), "*"))

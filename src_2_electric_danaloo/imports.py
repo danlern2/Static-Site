@@ -17,6 +17,18 @@ class TagType(Enum):
     PARAGRAPH: str = "p"
     DOC: str = "div"
 
+BLOCK_TAGS: set[str] = {
+    "ol",
+    "ul",
+    "pre",
+    "blockquote",
+    f"h{int}",
+    "p",
+    "div",
+
+}
+
+
 DELIMITER_TO_TYPE = {
     "`": TagType.CODE,
     "**": TagType.BOLD,

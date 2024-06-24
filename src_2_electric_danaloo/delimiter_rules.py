@@ -155,9 +155,9 @@ def image_rule(text: str, delim: str) -> tuple[list[HTMLNode], str, dict[str, st
     url: str = found[0][1]
     # * Assign the plain_text to all of the text after a found match's ending span.
     plain_text = text[match.span()[1] + 1 :]  # type: ignore
-    prop["img"] = url
+    prop["src"] = url
     prop["alt"] = alt_text
-    children.append(LeafNode(" ")) #//!Look into if this is a problem later
+    children.append(LeafNode("")) #//!Look into if this is a problem later
     return children, plain_text, prop
 
 
