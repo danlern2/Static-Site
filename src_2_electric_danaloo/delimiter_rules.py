@@ -31,8 +31,8 @@ def base_rule(text: str) -> tuple[list[HTMLNode], str]:
                 ) is False:
                     continue
                 # # * Check for the ending delimiter. If its a fake delimiter, continue.
-                if delim != "!" and delim != "[" and end_delimiter_checker(text[i+len(delim):], delim) is False:
-                    continue
+                # if delim != "!" and delim != "[" and end_delimiter_checker(text[i+len(delim):], delim) is False:
+                #     continue
                 plain_text = text[:i]
                 # * Since a delimiter rule was called, there is no more plain text. take what you have and append it as a leafnode
                 children.append(LeafNode(plain_text))
@@ -77,9 +77,9 @@ def delimited_rule(
                     text[i:], delim
                 ) is False:
                     continue
-            # # * Check for the ending delimiter. If its a fake delimiter, continue.
-            if text[i:].startswith(delim) and delim != "!" and delim != "[" and delim != end_delim and end_delimiter_checker(text[i+len(delim):], delim) is False:
-                continue
+            # # # * Check for the ending delimiter. If its a fake delimiter, continue.
+            # if text[i:].startswith(delim) and delim != "!" and delim != "[" and delim != end_delim and end_delimiter_checker(text[i+len(delim):], delim) is False:
+            #     continue
                 
             # * If you find the same delimiter the rule is currently checking for, you have found the end of the rule.
             # * return whatever text is found as a leafnode, and any remaining text
@@ -187,20 +187,23 @@ def link_and_image_checker(text: str, delim: str) -> bool:
             return True
     return False
 
-def end_delimiter_checker(text: str, delim: str) -> bool:
-    for i in range(len(text)):
+# def end_delimiter_checker(text: str, delim: str) -> bool:
+#     for i in range(len(text)):
+#         if text[i:].startswith(delim) and text[i-len(delim):i] == delim and text[i+1:i+len(delim)+1] == delim:
+#             continue
+#         if text[i:].startswith(delim) and text[i-1:i].isspace() and (not text[i+len(delim):].startswith("**") or not text[i+len(delim):].startswith("__")):
+#             return False
 
-        if text[i:].startswith(delim) and text[i-1:i].isspace() and (not text[i+len(delim):].startswith("**") or not text[i+len(delim):].startswith("__")):
-            return False
-        # * If the leading character is a space, youre at the start of a delimiter, not the end.
-        if text[i:].startswith(delim) and text[i-1:i].isspace():
-            continue
-        if text[i:].startswith(delim) and (delim == "**" or delim == "__"):
-            return True
-        
-        if text[i:].startswith(delim) and (i == (len(text)-1) or (text[i+1:i+1+len(delim)].isspace() or not text[i+1:i+1+len(delim)].isalpha())):
-            return True
-    return False
+#         # * If the leading character is a space, youre at the start of a delimiter, not the end.
+#         if text[i:].startswith(delim) and text[i-1:i].isspace():
+#             continue
+#         if text[i:].startswith(delim) and (delim == "**" or delim == "__"):
+#             return True
+#         if text[i:].startswith(delim) and text[i:i+1] == text[i+1:i+2]:
+#             continue
+#         if text[i:].startswith(delim) and (i == (len(text)-1) or (text[i+1:i+1+len(delim)].isspace() or not text[i+1:i+1+len(delim)].isalpha())):
+#             return True
+#     return False
 
 
 
@@ -216,11 +219,11 @@ DELIM_TO_RULE = {
 }
 
 
-# def test():
-#     text = "blep *Text** **like this**"
-#     delimited = base_rule(text)
-#     print(delimited)
-#     return
+def test():
+    text = "blep *Text **like this** b*"
+    delimited = base_rule(text)
+    print(delimited)
+    return
 
-# test()
+test()
 

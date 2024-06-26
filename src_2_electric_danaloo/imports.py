@@ -32,10 +32,10 @@ BLOCK_TAGS: set[str] = {
 DELIMITER_TO_TYPE = {
     "`": TagType.CODE,
     "**": TagType.BOLD,
-    # '__': TagType.BOLD,
+    '__': TagType.BOLD,
     "~~": TagType.STRIKE,
     "*": TagType.ITALIC,
-    # '_': TagType.ITALIC,
+    '_': TagType.ITALIC,
     "!": TagType.IMAGE,
     "[": TagType.LINK,
 }
@@ -50,10 +50,8 @@ TAG_TYPE_TO_TAG = {
     "div": TagType.DOC,
     "code": TagType.CODE,
     "b": TagType.BOLD,
-    # "b": TagType.BOLD,
     "strikethrough": TagType.STRIKE,
     "i": TagType.ITALIC,
-    # "i": TagType.ITALIC,
     "img": TagType.IMAGE,
     "a": TagType.LINK,
 }
