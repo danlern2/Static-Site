@@ -1,3 +1,4 @@
+from __future__ import annotations
 from textnode import TextNode, TextType, DELIMITER_TO_TYPE
 from typing import List
 from enum import Enum
@@ -102,12 +103,13 @@ import re
 #                 new_nodes.extend(split_nodes_link([TextNode(split[1], TextType.LINK)]))
 #     return new_nodes
 
-# def text_to_textnodes(text) -> List[TextNode]:
-#     node = TextNode(text, TextType.TEXT)
-#     delimited = split_nodes_by_delimiters([node])
-#     split_image = split_nodes_image(delimited)
-#     split_link = split_nodes_link(split_image)
-#     return split_link
+
+def text_to_textnodes(text: str) -> List[TextNode]:
+    node = TextNode(text, TextType.TEXT)
+    delimited = delimiter_loop_on_textnodes([node])
+    split_image = split_nodes_image(delimited)
+    split_link = split_nodes_link(split_image)
+    return split_link
 
 
 def text_list_to_textnodes(text_list: list[str]):
@@ -117,7 +119,11 @@ def text_list_to_textnodes(text_list: list[str]):
     return textnodes
 
 
-# print(text_to_textnodes("This is **text** with an *italic* word and a `code block` and an ![image](https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/zjjcJKZ.png) and a [link](https://boot.dev)"))
+# print(
+#     text_to_textnodes(
+#         "This is **text** with an *italic* word and a `code block` and an ![image](https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/zjjcJKZ.png) and a [link](https://boot.dev)"
+#     )
+# )
 
 
 # --------------Markdown blocks-------------#
@@ -138,10 +144,6 @@ def markdown_to_blocks(markdown: str) -> list[str]:
             continue
         block_list.append(block.strip())
     return block_list
-
-
-# with open("/home/danlern2/bootdevworkspace/static_site/src/markdown_test") as file:
-#     markdown_to_blocks(file.read())
 
 
 def block_to_block_type(markdown_block: str) -> MKBlockType:
@@ -248,15 +250,26 @@ def split_node_delimiter(node: TextNode, delimiter: str) -> List[TextNode]:
     if node.text_type != TextType.TEXT:
         new_nodes.append(node)
     elif delimiter in text:
+        # ---------------Italic Exception--------------#
+        # if (delimiter == "*" or delimiter == "_") and delimiter in text:
+        #     italicE = italic_exception(node, delimiter)
+        #     new_nodes.extend(italicE[0])
+        #     return textnodes_loop_with_delimiter(new_nodes, italicE[1])
+        # ---------------Italic Exception--------------#
+
         # Set i to the first instance index of the delimiter
         i = text.index(delimiter)
         # If there is no match for the delimiter in the rest of the text then its not a true case of that delimiter
         # and append it as is
         if delimiter not in text[i + len(delimiter) :]:
             new_nodes.append(node)
-        # If i is not at the start of the text then make that slice from 0 - i of the text a new TextNode and append it to the list.
+        # Check if there is any delimiter in the first segment. If there is, recursively call on this function to check that delimiter first.
+        # Otherwise make that slice from 0 - i of the text a new TextNode and append it to the list.
         if i != 0:
-            new_nodes.append(TextNode(text[:i], TextType.TEXT))
+            if nest_checker(text[:i])[0] is False:
+                new_nodes.append(TextNode(text[:i], TextType.TEXT))
+            else:
+                split_node_delimiter(node, nest_checker(text[:i])[1])
         # Set x to the value of the next index where you find the delimiter
         x = text[i + len(delimiter) :].index(delimiter) + len(
             text[: i + len(delimiter)]
@@ -276,6 +289,36 @@ def split_node_delimiter(node: TextNode, delimiter: str) -> List[TextNode]:
         new_nodes.append(node)
 
     return new_nodes
+
+
+# def italic_exception(node: TextNode, delimiter: str) -> tuple[list[TextNode], str]:
+#     i = 0
+#     x = 0
+#     new_nodes: list[TextNode] = []
+#     text: str = node.text
+
+#     # Set i to the first instance index of the delimiter
+#     i = text.index(delimiter)
+#     # If there is no match for the delimiter in the rest of the text then its not a true case of that delimiter
+#     # and append it as is
+#     if delimiter not in text[i + 1 :]:
+#         raise Exception("Not valid markdown")
+
+#     # Set x to the value of the next index where you find the delimiter
+#     x = text[i + 1 :].index(delimiter) + len(text[: i + 1])
+#     x += 1
+#     # Check if x is not the index of a pair of the delimiter (bold), and if it is, increment x to get outside.
+#     if x != len(text) and text[x] == delimiter[0]:
+#         x += 1
+#     # Check the text again for the delimiter
+#     if delimiter not in text[x + len(delimiter) :]:
+#         new_nodes.append(node)
+#     # If there is another delimiter in the text,
+
+#     return new_nodes, delimiter
+
+
+# print(italic_exception(TextNode("just *a **little test*** string", TextType.TEXT), "*"))
 
 
 def splitter(text: str, delimiter: str) -> List[TextNode]:
@@ -315,8 +358,8 @@ def splitter(text: str, delimiter: str) -> List[TextNode]:
 def nest_checker(text: str):
     for delim in DELIMITER_TO_TYPE:
         if delim in text:
-            return True
-    return False
+            return True, delim
+    return False, ""
 
 
 def extract_markdown_images(text: str) -> list[tuple[str, str]]:
@@ -365,20 +408,3 @@ def split_nodes_link(old_nodes: List[TextNode]) -> List[TextNode]:
             if len(split) > 1 and bool(split[1]) is True:
                 new_nodes.extend(split_nodes_link([TextNode(split[1], TextType.LINK)]))
     return new_nodes
-
-
-def text_to_textnodes(text: str) -> List[TextNode]:
-    node = TextNode(text, TextType.TEXT)
-    delimited = delimiter_loop_on_textnodes([node])
-    split_image = split_nodes_image(delimited)
-    split_link = split_nodes_link(split_image)
-    return split_link
-
-
-# print(split_node_delimiter(TextNode("This is __bolded and _italicized___ even if you think its not, because ___Markdown___ is very `_weird_`", TextType.TEXT), "__"))
-# print(delimiter_loop_on_textnodes([TextNode("This is __bolded and _italicized___ even if you think its not, because ___Markdown___ is very `_weird_`", TextType.TEXT)]))
-print(
-    delimiter_loop_on_textnodes(
-        [TextNode("hello, **This is your *captain* speaking**", TextType.TEXT)]
-    )
-)

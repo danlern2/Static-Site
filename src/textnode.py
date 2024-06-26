@@ -52,19 +52,21 @@ class TextNode:
 
 class TextType(Enum):
     TEXT: str = "text"
-    BOLD: str = "bold"
-    ITALIC: str = "italic"
     CODE: str = "code"
+    BOLD: str = "bold"
+    STRIKE: str = "strike"
+    ITALIC: str = "italic"
     LINK: str = "link"
     IMAGE: str = "image"
 
 
 DELIMITER_TO_TYPE = {
+    "`": TextType.CODE,
     "**": TextType.BOLD,
     # '__': TextType.BOLD,
+    "~~": TextType.STRIKE,
     "*": TextType.ITALIC,
     # '_': TextType.ITALIC,
-    "`": TextType.CODE,
 }
 REGEX_TO_TYPE = {
     re.compile(r"(\*\*\b)|(\b\*\*)"): TextType.BOLD,

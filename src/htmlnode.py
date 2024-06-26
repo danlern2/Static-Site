@@ -1,7 +1,7 @@
 from __future__ import annotations
 from textnode import TextNode, TextType
 from markdown_to_nodes import (
-    text_to_textnodes,
+    text_to_textnodes, # type: ignore
     markdown_to_blocks,
     block_to_block_type,
     MKBlockType,
