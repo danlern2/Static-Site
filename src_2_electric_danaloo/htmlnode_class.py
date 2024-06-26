@@ -84,8 +84,8 @@ class ParentNode(HTMLNode):
     def to_html(self) -> str:
         if self.tag is None:
             raise ValueError("Missing tag argument.")
-        elif bool(self.children) is False:
-            raise ValueError("Missing children argument.")
+        # elif bool(self.children) is False:
+        #     raise ValueError("Missing children argument.")
         if isinstance(self.tag, TagType):
             self.tag = self.tag.value
         html_string: str = ""

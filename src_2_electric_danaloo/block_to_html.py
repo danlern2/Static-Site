@@ -43,12 +43,7 @@ def block_to_block_type(markdown_block: str):
         ["- ", "* ", "+ ", "- "]
     ):
         return TagType.UNOLIST
-    elif markdown_block.startswith("1. "):
-        i = 1
-        for line in markdown_block.split("\n"):
-            if not line.startswith(f"{i}. "):
-                return TagType.PARAGRAPH
-            i += 1
+    elif markdown_block[0].isnumeric() and markdown_block[1:].startswith(". "):
         return TagType.OLIST
     return TagType.PARAGRAPH
 
